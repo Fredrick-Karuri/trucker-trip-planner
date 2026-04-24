@@ -1,0 +1,35 @@
+{
+  "name": "Trucker Trip Planner",
+  "build": {
+    "dockerfile": "../app/backend/Dockerfile",
+    "context": ".."
+  },
+  "runArgs": ["--privileged"],
+  "features": {
+    "ghcr.io/devcontainers/features/docker-in-docker:2": { "moby": false }
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "ms-python.mypy-type-checker",
+        "batisteo.vscode-django",
+        "esbenp.prettier-vscode",
+        "ms-azuretools.vscode-docker"
+      ],
+      "settings": {
+        "python.analysis.typeCheckingMode": "basic",
+        "python.analysis.extraPaths": ["/workspace/app/backend"]
+      }
+    }
+  },
+  "forwardPorts": [8000, 3000, 5432, 6379],
+  "postCreateCommand": {
+    "frontend": "npm install --prefix app/frontend",
+    "help": "make help"
+  },
+  "workspaceFolder": "/workspace",
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind",
+  "remoteUser": "vscode"
+}

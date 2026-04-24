@@ -1,0 +1,65 @@
+services:
+  api:
+    build:
+      context: ./app/backend
+      dockerfile: Dockerfile
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ./app/backend:/app
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    working_dir: /app
+    depends_on:
+      - postgres
+      - redis
+    restart: unless-stopped
+    networks:
+      - trucker_internal
+
+  worker:
+    build:
+      context: ./app/backend
+      dockerfile: Dockerfile
+    command: celery -A core worker --loglevel=info --concurrency=2
+    volumes:
+      - ./app/backend:/app
+    env_file:
+      - .env
+    working_dir: /app
+    depends_on:
+      - postgres
+      - redis
+    restart: unless-stopped
+    networks:
+      - trucker_internal
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+    networks:
+      - trucker_internal
+
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: trucker_trip_planner
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    networks:
+      - trucker_internal
+
+volumes:
+  postgres_data:
+
+networks:
+  trucker_internal:
+    driver: bridge

@@ -1,0 +1,19 @@
+Django
+djangorestframework
+django-cors-headers
+psycopg2-binary
+dj-database-url
+
+redis
+celery
+httpx
+hypothesis
+
+pytest
+pytest-django
+pytest-mock
+
+# Stubs
+django-stubs
+djangorestframework-stubs
+mypy
