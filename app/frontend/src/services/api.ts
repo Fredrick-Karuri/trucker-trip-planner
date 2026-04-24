@@ -10,7 +10,7 @@ import type {
   ApiError,
   TaskStatusResponse,
   TripPlanRequest,
-} from "@/types/";
+} from "@/types";
 
 const client = axios.create({
   baseURL: import.meta.env.VITE_API_URL ?? "",
