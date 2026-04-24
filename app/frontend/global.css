@@ -1,0 +1,62 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-primary: #177E89;
+  --color-primary-dark: #0f5a63;
+  --color-primary-light: #1a9aaa;
+  --color-deep-teal: #1a4a4f;
+  --color-surface: #323031;
+  --color-surface-hover: #3d3b3a;
+  --color-surface-border: #454342;
+  --color-background: #1e1c1d;
+  --color-background-deep: #161415;
+  --color-on-primary: #ffffff;
+  --color-on-surface: #f0eeec;
+  --color-on-surface-muted: #9e9b99;
+  --color-on-surface-faint: #5c5a58;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--color-background);
+  color: var(--color-on-surface);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--color-background-deep); }
+::-webkit-scrollbar-thumb { background: var(--color-surface-border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--color-on-surface-faint); }
+
+/* Focus ring */
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Leaflet overrides */
+.leaflet-container {
+  background: #1a1818;
+  font-family: 'DM Sans', sans-serif;
+}
+
+/* Print — hides everything except the active log sheet */
+@media print {
+  .no-print { display: none !important; }
+  .print-only { display: block !important; }
+  body { background: white; color: black; }
+}
