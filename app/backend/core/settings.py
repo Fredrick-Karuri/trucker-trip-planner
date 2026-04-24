@@ -5,18 +5,23 @@ All time math uses UTC. Local offsets apply only at render time (per Architectur
 """
 
 import os
-from decimal import Decimal
 from pathlib import Path
-
 import dj_database_url
+import environ
+from core.logging import configure_logging
+
+configure_logging(level=os.environ.get("LOG_LEVEL", "INFO"))
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "dev-secret-key-replace-in-production")
+env = environ.Env(
+    DEBUG=(bool, False),
+    LOG_LEVEL=(str, "INFO"),
+)
+environ.Env.read_env(BASE_DIR / ".env")
 
-DEBUG = os.environ.get("DJANGO_DEBUG", "True") == "True"
-
-ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
+SECRET_KEY = env("DJANGO_SECRET_KEY")
+DEBUG      = env("DJANGO_DEBUG")
 
 INSTALLED_APPS = [
     "django.contrib.contenttypes",
@@ -35,10 +40,7 @@ ROOT_URLCONF = "core.urls"
 
 DATABASES = {
     "default": dj_database_url.config(
-        default=os.environ.get(
-            "DATABASE_URL",
-            "postgres://postgres:postgres@postgres:5432/trucker_trip_planner",
-        ),
+        default=str(env("DATABASE_URL")),
         conn_max_age=600,
     )
 }
@@ -50,8 +52,7 @@ TIME_ZONE = "UTC"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # ─── Redis ────────────────────────────────────────────────────────────────────
-REDIS_URL = os.environ.get("REDIS_URL", "redis://redis:6379/0")
-
+REDIS_URL = env("REDIS_URL")
 CACHES = {
     "default": {
         "BACKEND": "django.core.cache.backends.redis.RedisCache",
@@ -60,40 +61,25 @@ CACHES = {
 }
 
 # ─── Celery ───────────────────────────────────────────────────────────────────
-CELERY_BROKER_URL = os.environ.get("CELERY_BROKER_URL", REDIS_URL)
-CELERY_RESULT_BACKEND = os.environ.get("CELERY_RESULT_BACKEND", REDIS_URL)
-CELERY_TASK_SERIALIZER = "json"
+CELERY_BROKER_URL     = env("CELERY_BROKER_URL")
+CELERY_RESULT_BACKEND = env("CELERY_RESULT_BACKEND")
+CELERY_TASK_SERIALIZER   = "json"
 CELERY_RESULT_SERIALIZER = "json"
-CELERY_ACCEPT_CONTENT = ["json"]
-CELERY_TIMEZONE = "UTC"
+CELERY_ACCEPT_CONTENT    = ["json"]
+CELERY_TIMEZONE          = "UTC"
 
 # ─── CORS ─────────────────────────────────────────────────────────────────────
-CORS_ALLOWED_ORIGINS = os.environ.get(
-    "CORS_ALLOWED_ORIGINS", "http://localhost:5173"
-).split(",")
+ALLOWED_HOSTS        = env.list("DJANGO_ALLOWED_HOSTS")
+CORS_ALLOWED_ORIGINS = env.list("CORS_ALLOWED_ORIGINS")
 
 # ─── REST Framework ───────────────────────────────────────────────────────────
 REST_FRAMEWORK = {
     "DEFAULT_RENDERER_CLASSES": ["rest_framework.renderers.JSONRenderer"],
-    "DEFAULT_PARSER_CLASSES": ["rest_framework.parsers.JSONParser"],
-    "EXCEPTION_HANDLER": "api.exceptions.custom_exception_handler",
+    "DEFAULT_PARSER_CLASSES":   ["rest_framework.parsers.JSONParser"],
+    "EXCEPTION_HANDLER":        "api.exceptions.custom_exception_handler",
 }
 
-# ─── HOS Constants (immutable — never change these values) ───────────────────
-HOS_MAX_DRIVE_HOURS = Decimal("11")
-HOS_DUTY_WINDOW_HOURS = Decimal("14")
-HOS_BREAK_TRIGGER_HOURS = Decimal("8")
-HOS_BREAK_DURATION_MINUTES = Decimal("30")
-HOS_REST_DURATION_HOURS = Decimal("10")
-HOS_CYCLE_CAP_HOURS = Decimal("70")
-HOS_RESTART_DURATION_HOURS = Decimal("34")
-HOS_SPEED_MPH = Decimal("55")
-HOS_PICKUP_DURATION_HOURS = Decimal("1")
-HOS_DROPOFF_DURATION_HOURS = Decimal("1")
-HOS_FUEL_INTERVAL_MILES = Decimal("1000")
-HOS_FUEL_STOP_MINUTES = Decimal("30")
-
 # ─── OpenRouteService ─────────────────────────────────────────────────────────
-ORS_API_KEY = os.environ.get("ORS_API_KEY", "")
-ORS_BASE_URL = os.environ.get("ORS_BASE_URL", "https://api.openrouteservice.org")
+ORS_API_KEY                   = env("ORS_API_KEY")
+ORS_BASE_URL                  = env("ORS_BASE_URL")
 ORS_GEOCODE_CACHE_TTL_SECONDS = 60 * 60 * 24 * 7  # 7 days

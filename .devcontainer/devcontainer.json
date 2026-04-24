@@ -1,7 +1,7 @@
 {
   "name": "Trucker Trip Planner",
   "build": {
-    "dockerfile": "../app/backend/Dockerfile",
+    "dockerfile": "../Dockerfile.dev",
     "context": ".."
   },
   "runArgs": ["--privileged"],
