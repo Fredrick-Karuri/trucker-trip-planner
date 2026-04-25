@@ -6,8 +6,6 @@ into the plain dict that the Celery task returns and the API view sends as JSON.
 Schema matches the TripPlanResponse TypeScript type exactly (system design p.17).
 """
 
-from decimal import Decimal
-
 from connectors.ors_client import RouteResult
 from services.daily_log_generator import DailyLogSheet
 from services.types import TimelineEvent, EventKind

@@ -66,6 +66,7 @@ export interface DailyLogEntry {
 export interface TripSummary {
   total_miles: number;
   total_duration_hrs: number;
+  total_drive_hrs: number;
   eta: string; // ISO 8601
 }
 
