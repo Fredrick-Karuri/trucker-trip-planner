@@ -1,8 +1,9 @@
-"""API URL routing."""
+"""URL patterns for the Trucker Trip Planner API."""
 
 from django.urls import path
-from .views import health
+from api import views
 
 urlpatterns = [
-    path("health/", health, name="health"),
+    path("trip/plan/", views.plan_trip, name="trip-plan"),
+    path("trip/status/<str:task_id>/", views.trip_status, name="trip-status"),
 ]
