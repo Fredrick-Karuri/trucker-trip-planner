@@ -13,6 +13,7 @@ hypothesis
 pytest
 pytest-django
 pytest-mock
+pytest-timeout
 
 # Stubs
 django-stubs

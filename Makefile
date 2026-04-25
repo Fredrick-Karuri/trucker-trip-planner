@@ -30,8 +30,26 @@ makemigrations:
 migrate:
 	docker compose exec api python manage.py migrate
 
+test-backend:
+	docker compose exec api pytest -q
+
+test-frontend:
+	docker compose exec web npm test -- --run
+
+test-property:
+	docker compose exec api pytest -m property_based --tb=short
+
 test:
-	docker compose exec api python -m pytest tests/
+	@echo "── Backend ──────────────────────"
+	docker compose exec api pytest --tb=short
+	@echo "── Frontend ─────────────────────"
+	docker compose exec web npm test -- --run
+
+drop-testdb:
+	docker compose exec db psql -U postgres -c \
+		"SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = 'test_trucker_trip_planner' AND pid <> pg_backend_pid();"
+	docker compose exec db psql -U postgres -c \
+		"DROP DATABASE IF EXISTS test_trucker_trip_planner;"
 
 seed:
 	docker compose exec api python scripts/seed.py
@@ -54,4 +72,5 @@ help:
 	@echo "  make migrate          Apply migrations"
 	@echo "  make seed             Seed the database"
 	@echo "  make test             Run pytest"
+	@echo "  make test-property    Run property-based (Hypothesis) tests only"
 	@echo ""

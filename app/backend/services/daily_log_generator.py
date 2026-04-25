@@ -8,52 +8,14 @@ totals sum to exactly Decimal('24.00') (Architecture Rule #4 / system design p.9
 Events that span midnight are split: the tail goes to day N, the head to day N+1.
 """
 
-from dataclasses import dataclass, field
 from datetime import date, datetime, timedelta, timezone
 from decimal import Decimal, ROUND_HALF_UP
 
-from services.types import DutyStatus, EventKind, TimelineEvent
+from services.types import DailyLogSheet, DailyLogTotals, DutyStatus, EventKind, LogRemark, LogSegment, TimelineEvent
 
 
 # ─── Output types ─────────────────────────────────────────────────────────────
 
-@dataclass
-class LogSegment:
-    """One duty-status band within a single calendar day, ready for SVG rendering."""
-
-    status: DutyStatus
-    start_hhmm: str    # "HH:MM" — local display time
-    end_hhmm: str      # "HH:MM"
-    duration_hrs: Decimal
-    location: str = ""
-
-
-@dataclass
-class LogRemark:
-    time_hhmm: str
-    note: str
-
-
-@dataclass
-class DailyLogTotals:
-    off_duty: Decimal = Decimal("0")
-    sleeper: Decimal = Decimal("0")
-    driving: Decimal = Decimal("0")
-    on_duty: Decimal = Decimal("0")
-
-    @property
-    def total(self) -> Decimal:
-        return self.off_duty + self.sleeper + self.driving + self.on_duty
-
-
-@dataclass
-class DailyLogSheet:
-    """Complete data for one FMCSA 24-hour log sheet."""
-
-    date: date
-    segments: list[LogSegment] = field(default_factory=list)
-    totals: DailyLogTotals = field(default_factory=DailyLogTotals)
-    remarks: list[LogRemark] = field(default_factory=list)
 
 
 # ─── Helpers ──────────────────────────────────────────────────────────────────

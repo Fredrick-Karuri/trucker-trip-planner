@@ -1,5 +1,6 @@
 
 """
+# backend/services/types
 Shared types for the Trucker Trip Planner simulation pipeline.
 
 All time values use Decimal(10,2) — never float.
@@ -7,7 +8,7 @@ All timestamps are UTC datetimes.
 """
 
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime,date
 from decimal import Decimal
 from enum import Enum
 
@@ -59,3 +60,43 @@ class SimulationState:
     miles_since_fuel: Decimal = Decimal("0")
     total_miles_driven: Decimal = Decimal("0")
     break_taken_after_reset: bool = True      # True = break not yet needed
+
+
+
+@dataclass
+class LogSegment:
+    """One duty-status band within a single calendar day, ready for SVG rendering."""
+
+    status: DutyStatus
+    start_hhmm: str    # "HH:MM" — local display time
+    end_hhmm: str      # "HH:MM"
+    duration_hrs: Decimal
+    location: str = ""
+
+
+@dataclass
+class LogRemark:
+    time_hhmm: str
+    note: str
+
+
+@dataclass
+class DailyLogTotals:
+    off_duty: Decimal = Decimal("0")
+    sleeper: Decimal = Decimal("0")
+    driving: Decimal = Decimal("0")
+    on_duty: Decimal = Decimal("0")
+
+    @property
+    def total(self) -> Decimal:
+        return self.off_duty + self.sleeper + self.driving + self.on_duty
+
+
+@dataclass
+class DailyLogSheet:
+    """Complete data for one FMCSA 24-hour log sheet."""
+
+    date: date
+    segments: list[LogSegment] = field(default_factory=list)
+    totals: DailyLogTotals = field(default_factory=DailyLogTotals)
+    remarks: list[LogRemark] = field(default_factory=list)
