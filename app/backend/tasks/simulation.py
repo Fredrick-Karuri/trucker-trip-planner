@@ -7,7 +7,6 @@ The API enqueues a task and returns 202 immediately; the client polls for comple
 
 import logging
 from decimal import Decimal
-
 from celery import shared_task
 
 logger = logging.getLogger(__name__)
