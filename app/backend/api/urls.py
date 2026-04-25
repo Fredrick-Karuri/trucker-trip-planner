@@ -1,4 +1,4 @@
-"""URL patterns for the Trucker Trip Planner API."""
+"""URL patterns API."""
 
 from django.urls import path
 from api import views

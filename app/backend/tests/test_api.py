@@ -1,5 +1,5 @@
 """
-Integration tests for the Trucker Trip Planner API endpoints.
+Integration tests for the API endpoints.
 
 Verifies request validation, error code mapping, and task enqueue/poll flow.
 ORS is mocked in all tests — no live API calls.

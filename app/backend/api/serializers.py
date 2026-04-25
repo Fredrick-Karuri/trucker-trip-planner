@@ -1,5 +1,5 @@
 """
-DRF serializers for the Trucker Trip Planner API.
+DRF serializers .
 
 Request validation lives here. Business logic lives in services/.
 """
@@ -20,11 +20,11 @@ class TripPlanRequestSerializer(serializers.Serializer):
     )
     start_time = serializers.DateTimeField()
 
-    def validate_current_location(self, value):
+    def validate_current_location(self, value: str) -> str:
         return value.strip()
 
-    def validate_pickup_location(self, value):
+    def validate_pickup_location(self, value: str) -> str:
         return value.strip()
 
-    def validate_dropoff_location(self, value):
+    def validate_dropoff_location(self, value: str) -> str:
         return value.strip()

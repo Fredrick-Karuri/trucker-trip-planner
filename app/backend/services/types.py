@@ -1,7 +1,6 @@
 
 """
-# backend/services/types
-Shared types for the Trucker Trip Planner simulation pipeline.
+Shared types for the simulation pipeline.
 
 All time values use Decimal(10,2) — never float.
 All timestamps are UTC datetimes.

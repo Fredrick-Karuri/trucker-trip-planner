@@ -1,22 +1,22 @@
 """
-HOS Rules Engine for the Trucker Trip Planner.
+HOS Rules Engine.
 
 Pure function: inputs → List[TimelineEvent]. No side effects, no DB calls,
-no network calls (Architecture Rules #1 and #2).
+no network calls.
 
-Rule conflict priority (Architecture Rule #7):
+Rule conflict priority:
     34-hr restart > 10-hr rest > 30-min break
 
 All constants are imported from Django settings — never inlined here.
-All time arithmetic is UTC (Architecture Rule #3).
-All durations are Decimal — never float (Architecture Rule #4).
+All time arithmetic is UTC .
+All durations are Decimal — never float .
 """
 
 from datetime import datetime, timezone, timedelta
 from decimal import Decimal, ROUND_HALF_UP
 from typing import TYPE_CHECKING
 
-from django.conf import settings
+from core.hos_config import HOS
 
 from connectors.ors_client import RouteResult, RouteLeg
 from services.types import DutyStatus, EventKind, SimulationState, TimelineEvent
@@ -61,22 +61,22 @@ def _event(
 
 def _needs_34hr_restart(state: SimulationState) -> bool:
     """Cycle cap hit — highest priority rest (Architecture Rule #7)."""
-    return state.cycle_hours_used >= settings.HOS_CYCLE_CAP_HOURS
+    return state.cycle_hours_used >= HOS.CYCLE_CAP_HOURS
 
 
 def _needs_10hr_rest(state: SimulationState) -> bool:
     """Shift drive limit or duty window exhausted."""
     duty_elapsed = _decimal_hours(state.clock - state.duty_window_start)
     return (
-        state.drive_hours_today >= settings.HOS_MAX_DRIVE_HOURS
-        or duty_elapsed >= settings.HOS_DUTY_WINDOW_HOURS
+        state.drive_hours_today >= HOS.MAX_DRIVE_HOURS
+        or duty_elapsed >= HOS.DUTY_WINDOW_HOURS
     )
 
 
 def _needs_30min_break(state: SimulationState) -> bool:
     """8 cumulative driving hours without a 30-min break."""
     return (
-        state.cumulative_drive_since_break >= settings.HOS_BREAK_TRIGGER_HOURS
+        state.cumulative_drive_since_break >= HOS.BREAK_TRIGGER_HOURS
         and not state.break_taken_after_reset
     )
 
@@ -86,7 +86,7 @@ def _inject_34hr_restart(
     timeline: list[TimelineEvent],
     location: str,
 ) -> None:
-    duration = settings.HOS_RESTART_DURATION_HOURS
+    duration = HOS.RESTART_DURATION_HOURS
     timeline.append(_event(EventKind.RESTART_34HR, DutyStatus.OFF_DUTY, state, duration, location))
     state.drive_hours_today = Decimal("0")
     state.cumulative_drive_since_break = Decimal("0")
@@ -100,7 +100,7 @@ def _inject_10hr_rest(
     timeline: list[TimelineEvent],
     location: str,
 ) -> None:
-    duration = settings.HOS_REST_DURATION_HOURS
+    duration = HOS.REST_DURATION_HOURS
     timeline.append(_event(EventKind.REST_10HR, DutyStatus.OFF_DUTY, state, duration, location))
     state.drive_hours_today = Decimal("0")
     state.cumulative_drive_since_break = Decimal("0")
@@ -113,7 +113,7 @@ def _inject_30min_break(
     timeline: list[TimelineEvent],
     location: str,
 ) -> None:
-    duration = settings.HOS_BREAK_DURATION_MINUTES / Decimal("60")
+    duration = HOS.BREAK_DURATION_MINUTES / Decimal("60")
     timeline.append(_event(EventKind.REST_BREAK, DutyStatus.OFF_DUTY, state, duration, location))
     state.cumulative_drive_since_break = Decimal("0")
     state.break_taken_after_reset = True
@@ -124,7 +124,7 @@ def _inject_fuel_stop(
     timeline: list[TimelineEvent],
     location: str,
 ) -> None:
-    duration = settings.HOS_FUEL_STOP_MINUTES / Decimal("60")
+    duration = HOS.FUEL_STOP_MINUTES / Decimal("60")
     on_duty_duration = duration
     timeline.append(
         _event(EventKind.FUEL_STOP, DutyStatus.ON_DUTY_NOT_DRIVING, state, on_duty_duration, location)
@@ -166,24 +166,24 @@ def _drive_leg(
     no chunk ever exceeds the hours remaining before the next required stop.
     """
     miles_remaining = leg.distance_miles
-    speed = settings.HOS_SPEED_MPH
+    speed = HOS.SPEED_MPH
 
     while miles_remaining > Decimal("0"):
         # ── Before each driving chunk, satisfy any pending rest obligations ──
         _check_and_inject_required_rest(state, timeline, origin_label)
 
         # ── Compute the maximum miles driveable before the next interrupt ──
-        hours_to_drive_limit = settings.HOS_MAX_DRIVE_HOURS - state.drive_hours_today
-        hours_to_duty_window = settings.HOS_DUTY_WINDOW_HOURS - _decimal_hours(
+        hours_to_drive_limit = HOS.MAX_DRIVE_HOURS - state.drive_hours_today
+        hours_to_duty_window = HOS.DUTY_WINDOW_HOURS - _decimal_hours(
             state.clock - state.duty_window_start
         )
         hours_to_break = (
-            settings.HOS_BREAK_TRIGGER_HOURS - state.cumulative_drive_since_break
+            HOS.BREAK_TRIGGER_HOURS - state.cumulative_drive_since_break
             if not state.break_taken_after_reset
-            else settings.HOS_BREAK_TRIGGER_HOURS
+            else HOS.BREAK_TRIGGER_HOURS
         )
-        hours_to_fuel = (settings.HOS_FUEL_INTERVAL_MILES - state.miles_since_fuel) / speed
-        hours_to_cycle_cap = (settings.HOS_CYCLE_CAP_HOURS - state.cycle_hours_used)
+        hours_to_fuel = (HOS.FUEL_INTERVAL_MILES - state.miles_since_fuel) / speed
+        hours_to_cycle_cap = (HOS.CYCLE_CAP_HOURS - state.cycle_hours_used)
 
         # The minimum of all limits is how long we can drive in this chunk
         max_drive_hours = min(
@@ -229,7 +229,7 @@ def _drive_leg(
         state.break_taken_after_reset = False
 
         # Fuel stop triggered mid-leg?
-        if state.miles_since_fuel >= settings.HOS_FUEL_INTERVAL_MILES:
+        if state.miles_since_fuel >= HOS.FUEL_INTERVAL_MILES:
             _inject_fuel_stop(state, timeline, "en route")
 
 
@@ -272,7 +272,7 @@ def simulate(
     _drive_leg(route.leg_to_pickup, state, timeline, "origin", "pickup")
 
     # ── Pickup: 1 hr ON_DUTY_NOT_DRIVING ──────────────────────────────────────
-    pickup_duration = settings.HOS_PICKUP_DURATION_HOURS
+    pickup_duration = HOS.PICKUP_DURATION_HOURS
     timeline.append(
         _event(EventKind.PICKUP, DutyStatus.ON_DUTY_NOT_DRIVING, state, pickup_duration, "pickup")
     )
@@ -282,7 +282,7 @@ def simulate(
     _drive_leg(route.leg_to_dropoff, state, timeline, "pickup", "dropoff")
 
     # ── Dropoff: 1 hr ON_DUTY_NOT_DRIVING ─────────────────────────────────────
-    dropoff_duration = settings.HOS_DROPOFF_DURATION_HOURS
+    dropoff_duration = HOS.DROPOFF_DURATION_HOURS
     timeline.append(
         _event(EventKind.DROPOFF, DutyStatus.ON_DUTY_NOT_DRIVING, state, dropoff_duration, "dropoff")
     )

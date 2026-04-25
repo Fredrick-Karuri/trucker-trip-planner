@@ -2,7 +2,7 @@
 OpenRouteService API connector for the Trucker Trip Planner.
 
 Wraps geocoding and HGV routing. All geocoded addresses are cached in Redis
-using SHA-256(normalized_address) as the key (Architecture Rule #6).
+using SHA-256(normalized_address) as the key .
 
 Raises:
     GeocodingError   → 400 Bad Request  (address not found)

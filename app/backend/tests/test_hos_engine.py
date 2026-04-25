@@ -3,7 +3,7 @@ Unit tests for the HOS Rules Engine.
 
 Three gold-standard scenarios plus property-based tests (Hypothesis).
 Every test asserts: total_off + total_on + total_drive == Decimal('24.00') per day.
-ORS is never called — all routes use the make_route fixture (Development Guideline).
+ORS is never called — all routes use the make_route fixture.
 """
 
 from decimal import Decimal
@@ -155,7 +155,7 @@ class TestCycleReset:
     """
     Driver starts with 70 hrs used — the cycle cap is already hit.
     The engine must inject a 34-hr restart BEFORE any driving begins.
-    This is the highest priority rule (Architecture Rule #7).
+    This is the highest priority rule.
     """
 
     timeline: list[TimelineEvent]

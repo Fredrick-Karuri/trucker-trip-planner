@@ -1,6 +1,5 @@
 /**
  * Shared TypeScript types for the Trucker Trip Planner.
- * These mirror the API contract defined in the system design (p.16–17).
  */
 
 // ─── Request ──────────────────────────────────────────────────────────────────

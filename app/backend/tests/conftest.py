@@ -1,7 +1,7 @@
 """
-Pytest configuration and shared fixtures for the Trucker Trip Planner test suite.
+Pytest configuration and shared fixtures for the test suite.
 
-ORS is always mocked — no live API calls (Development Guideline).
+ORS is always mocked — no live API calls.
 Every test that produces a simulation result must assert the 24.0h invariant.
 """
 
@@ -43,23 +43,23 @@ def make_route(
     )
 
 
-START_TIME = "2024-01-15T08:00:00Z"
-START_DT = datetime(2024, 1, 15, 8, 0, 0, tzinfo=timezone.utc)
+START_TIME: str = "2024-01-15T08:00:00Z"
+START_DT: datetime = datetime(2024, 1, 15, 8, 0, 0, tzinfo=timezone.utc)
 
 
 @pytest.fixture
-def short_haul_route():
+def short_haul_route() -> RouteResult:
     """300 mi each leg — fits in a single shift, no break required."""
     return make_route(pickup_miles=300, dropoff_miles=0)
 
 
 @pytest.fixture
-def otr_route():
+def otr_route() -> RouteResult:
     """1,100 mi each leg — requires multiple rests and at least 2 fuel stops."""
     return make_route(pickup_miles=1100, dropoff_miles=900)
 
 
 @pytest.fixture
-def cycle_reset_route():
+def cycle_reset_route() -> RouteResult:
     """Short route used with cycle_hours_used=70 to trigger 34-hr restart."""
     return make_route(pickup_miles=100, dropoff_miles=100)

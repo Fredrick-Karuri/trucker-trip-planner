@@ -1,8 +1,7 @@
 """
-Database models for the Trucker Trip Planner.
+Database models.
 
 All hour/time fields use DecimalField(max_digits=10, decimal_places=2) — never FloatField.
-Per Architecture Rule #4: daily log totals must always equal exactly 24.0 hours.
 """
 
 import hashlib
@@ -26,7 +25,6 @@ class GeocodeCache(models.Model):
 
     Uses a SHA-256 hash of the normalized address string as the primary key,
     enabling O(1) lookup without network calls for repeated addresses.
-    Per Architecture Rule #6.
     """
 
     address_hash = models.CharField(max_length=64, primary_key=True)
@@ -39,7 +37,7 @@ class GeocodeCache(models.Model):
     class Meta:
         db_table = "geocode_cache"
 
-    def __str__(self):
+    def __str__(self)->str:
         return f"{self.raw_address} → ({self.latitude}, {self.longitude})"
 
     @classmethod
@@ -67,7 +65,7 @@ class Trip(models.Model):
         db_table = "trips"
         ordering = ["-created_at"]
 
-    def __str__(self):
+    def __str__(self)->str:
         return f"Trip {self.id}: {self.current_location} → {self.dropoff_location}"
 
 
@@ -91,7 +89,7 @@ class TripSegment(models.Model):
         db_table = "trip_segments"
         ordering = ["sequence"]
 
-    def __str__(self):
+    def __str__(self)->str:
         return f"{self.status} {self.start_time} → {self.end_time}"
 
 
@@ -101,7 +99,7 @@ class DailyLog(models.Model):
 
     The invariant total_off_duty + total_sleeper + total_driving + total_on_duty_nd
     must equal exactly Decimal('24.00'). This is enforced in clean() and in the
-    Daily Log Generator service (per Architecture Rule #4 and system design p.9).
+    Daily Log Generator service .
     """
 
     trip = models.ForeignKey(Trip, on_delete=models.CASCADE, related_name="daily_logs")
@@ -117,7 +115,7 @@ class DailyLog(models.Model):
         ordering = ["date"]
         unique_together = [("trip", "date")]
 
-    def clean(self):
+    def clean(self)->None:
         total = (
             self.total_off_duty
             + self.total_sleeper
@@ -130,5 +128,5 @@ class DailyLog(models.Model):
                 "This is a legal compliance requirement (FMCSA 395.8)."
             )
 
-    def __str__(self):
+    def __str__(self)->str:
         return f"DailyLog {self.date} — Trip {self.trip_id}"

@@ -1,9 +1,9 @@
 """
-Daily Log Generator for the Trucker Trip Planner.
+Daily Log Generator.
 
 Slices a flat TimelineEvent list at UTC midnight boundaries to produce
 one DailyLogSheet per calendar day. Hard-validates that every day's
-totals sum to exactly Decimal('24.00') (Architecture Rule #4 / system design p.9).
+totals sum to exactly Decimal('24.00').
 
 Events that span midnight are split: the tail goes to day N, the head to day N+1.
 """
@@ -154,14 +154,6 @@ def build_daily_logs(timeline: list[TimelineEvent]) -> list[DailyLogSheet]:
         2. Pad the final segment of each day to reach exactly 24.00 hours.
         3. Hard-validate every sheet totals exactly 24.00 — raises ValueError if not.
 
-    Args:
-        timeline: Ordered, gap-free list produced by the HOS rules engine.
-
-    Returns:
-        List of DailyLogSheet sorted ascending by date.
-
-    Raises:
-        ValueError: If any day's totals do not equal exactly Decimal('24.00').
     """
     if not timeline:
         return []

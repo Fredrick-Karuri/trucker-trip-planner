@@ -1,14 +1,13 @@
 """
-Result serialiser for the Trucker Trip Planner.
+Result serialiser.
 
 Converts native simulation types (RouteResult, TimelineEvent, DailyLogSheet)
 into the plain dict that the Celery task returns and the API view sends as JSON.
-Schema matches the TripPlanResponse TypeScript type exactly (system design p.17).
+Schema matches the TripPlanResponse TypeScript type exactly.
 """
 
 from connectors.ors_client import RouteResult
-from services.daily_log_generator import DailyLogSheet
-from services.types import TimelineEvent, EventKind
+from services.types import DailyLogSheet, TimelineEvent, EventKind
 
 
 _STOP_KINDS = {
@@ -34,7 +33,7 @@ def serialise_result(
     route: RouteResult,
     timeline: list[TimelineEvent],
     daily_logs: list[DailyLogSheet],
-) -> dict:
+) -> dict[str, object]:
     """
     Produce the full TripPlanResponse-shaped dict from simulation outputs.
 
