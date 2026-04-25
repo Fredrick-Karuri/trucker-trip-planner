@@ -9,6 +9,7 @@ redis
 celery
 httpx
 hypothesis
+polyline
 
 pytest
 pytest-django
