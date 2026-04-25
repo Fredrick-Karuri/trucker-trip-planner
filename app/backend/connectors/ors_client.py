@@ -1,8 +1,8 @@
 """
-OpenRouteService API connector for the Trucker Trip Planner.
+OpenRouteService API connector.
 
 Wraps geocoding and HGV routing. All geocoded addresses are cached in Redis
-using SHA-256(normalized_address) as the key .
+using SHA-256(normalized_address) as the key.
 
 Raises:
     GeocodingError   → 400 Bad Request  (address not found)
@@ -180,6 +180,12 @@ def _fetch_hgv_route(origin: Coordinate, destination: Coordinate) -> RouteLeg:
 
     geometry = routes[0]["geometry"]
     coordinates = geometry.get("coordinates", []) if isinstance(geometry, dict) else []
+
+    if not coordinates:
+        raise RoutingError(
+            "OpenRouteService returned a route with no geometry coordinates. "
+            "The HGV profile may not cover this road segment."
+        )
 
     return RouteLeg(
         distance_miles=distance_miles,

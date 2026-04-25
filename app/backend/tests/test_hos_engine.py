@@ -77,9 +77,9 @@ class TestShortHaul:
         breaks = events_of_kind(self.timeline, EventKind.REST_BREAK)
         assert len(breaks) == 0, "Under 8 hrs driving — no 30-min break required"
 
-    def test_one_fuel_stop(self) -> None:
+    def test_no_fuel_stop_under_1000_miles(self)->None:
         fuel = events_of_kind(self.timeline, EventKind.FUEL_STOP)
-        assert len(fuel) == 0
+        assert len(fuel) == 0, "300-mile trip does not cross the 1,000-mile fuel threshold"
 
     def test_fuel_stop_is_on_duty_not_driving(self) -> None:
         for e in events_of_kind(self.timeline, EventKind.FUEL_STOP):
@@ -200,6 +200,45 @@ class TestCycleReset:
         """200-mi trip should not require a second restart after the first."""
         restarts = events_of_kind(self.timeline, EventKind.RESTART_34HR)
         assert len(restarts) == 1
+
+
+# ─── regression: short trip OFF_DUTY padding ──────────────────────────
+ 
+class TestShortTripOffDutyPadding:
+    """
+    Regression: a trip that ends mid-day must pad remaining
+    hours as OFF_DUTY, not ON_DUTY_NOT_DRIVING.
+ 
+    292 miles at 55 mph ≈ 5.31 hrs driving.
+    Plus 1 hr pickup + 1 hr dropoff = ~7.31 hrs total on-duty activity.
+    Remaining ~16.69 hrs of the day MUST be OFF_DUTY per FMCSA 395.8.
+    """
+ 
+    def setup_method(self)->None:
+        route = make_route(pickup_miles=292, dropoff_miles=0)
+        self.timeline = simulate(route, Decimal("0"), START_TIME)
+        self.logs = build_daily_logs(self.timeline)
+ 
+    def test_24h_invariant(self)->None:
+        assert_24h_invariant(self.logs)
+ 
+    def test_off_duty_hours_dominate(self)->None:
+        day = self.logs[0]
+        assert day.totals.off_duty >= Decimal("9.00"), (
+            f"Short trip must leave ≥9h as OFF_DUTY, got {day.totals.off_duty}"
+        )
+ 
+    def test_on_duty_nd_is_only_loading_time(self)->None:
+        day = self.logs[0]
+        assert day.totals.on_duty <= Decimal("3.00"), (
+            f"ON_DUTY_NOT_DRIVING should be ≤3h (pickup+dropoff), got {day.totals.on_duty}"
+        )
+ 
+    def test_last_segment_is_off_duty(self)->None:
+        last_seg = self.logs[0].segments[-1]
+        assert last_seg.status == DutyStatus.OFF_DUTY, (
+            f"Last segment must be OFF_DUTY, got {last_seg.status}"
+        )
 
 
 # ─── Property-based tests (Hypothesis) ───────────────────────────────────────
