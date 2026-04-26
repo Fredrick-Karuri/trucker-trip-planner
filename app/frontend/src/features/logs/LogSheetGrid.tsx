@@ -187,13 +187,13 @@ interface LogSheetGridProps {
 
 export function LogSheetGrid({ log }: LogSheetGridProps) {
   return (
-    <svg
-      viewBox={`0 0 ${GRID.WIDTH} ${GRID.TOTAL_HEIGHT}`}
-      width="100%"
-      style={{ display: "block", overflow: "visible" }}
-      aria-label={`ELD duty-status grid for ${log.date}`}
-      role="img"
-    >
+<svg
+  viewBox={`0 0 ${GRID.WIDTH} ${GRID.TOTAL_HEIGHT}`}
+  width="100%"
+  style={{ display: "block", overflow: "visible", minWidth: "560px" }}
+  aria-label={`ELD duty-status grid for ${log.date}`}
+  role="img"
+>
       {/* Background */}
       <rect x={0} y={0} width={GRID.WIDTH} height={GRID.TOTAL_HEIGHT}
         fill={colors.backgroundDeep} rx={4}

@@ -45,11 +45,12 @@ export const logStyles = {
     fontFamily: typography.fontMono,
   } satisfies CSSProperties,
 
-  gridWrapper: {
-    padding: spacing.lg,
-    overflowX: "auto" as const,
-  } satisfies CSSProperties,
-
+gridWrapper: {
+  overflowX: "auto",
+  WebkitOverflowScrolling: "touch",
+  margin: `0 -${spacing.md}`,   // bleed to card edges so scroll feels natural
+  padding: `0 ${spacing.md}`,
+} satisfies CSSProperties,
   gridTitle: {
     fontSize: typography.sizeXs,
     fontWeight: typography.weightMedium,

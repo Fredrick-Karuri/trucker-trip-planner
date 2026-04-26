@@ -54,6 +54,11 @@ body {
   font-family: 'DM Sans', sans-serif;
 }
 
+.leaflet-bottom.leaflet-right,
+.leaflet-bottom.leaflet-left {
+  z-index: 400;
+}
+
 /* Print — hides everything except the active log sheet */
 @media print {
   .no-print { display: none !important; }
