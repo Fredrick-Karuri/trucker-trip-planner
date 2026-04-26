@@ -6,59 +6,51 @@ const styles = {
     background: colors.background,
   } as React.CSSProperties,
 
-  // ── Grid ────────────────────────────────────────────────────────────────────
-  grid: {
-    display: "grid",
-    gridTemplateColumns: "1fr 280px",
-    gridTemplateRows: "480px auto",
-    gap: spacing.md,
+  // ── Map-dominant layout ─────────────────────────────────────────────────────
+  mapSection: {
+    position: "relative" as const,
+    width: "100%",
+    height: "75vh",
+    minHeight: "400px",
+  } as React.CSSProperties,
+
+  mapSectionMobile: {
+    position: "relative" as const,
+    width: "100%",
+    height: "75vh",
+    minHeight: "280px",
+  } as React.CSSProperties,
+
+  // Overlay panel — floats over the map on the right
+  overlayPanel: {
+    position: "absolute" as const,
+    top: spacing.md,
+    right: spacing.md,
+    bottom: spacing.md,
+    width: "300px",
+    zIndex: 500,
+    display: "flex",
+    flexDirection: "column" as const,
+    pointerEvents: "none" as const,
+  } as React.CSSProperties,
+
+  overlayPanelInner: {
+    background: `${colors.surface}f0`,
+    backdropFilter: "blur(12px)",
+    border: `1px solid ${colors.surfaceBorder}`,
+    borderRadius: "12px",
     padding: spacing.md,
+    overflowY: "auto" as const,
+    maxHeight: "100%",
+    pointerEvents: "auto" as const,
+    flex: 1,
+  } as React.CSSProperties,
+
+  // Below the map
+  belowMap: {
+    padding: `${spacing.md} ${spacing.md}`,
     maxWidth: "1400px",
     margin: "0 auto",
-  } as React.CSSProperties,
-
-  gridMobile: {
-    display: "grid",
-    gridTemplateColumns: "1fr",
-    gridTemplateRows: "260px auto auto",
-    gap: spacing.md,
-    padding: spacing.sm,
-    maxWidth: "1400px",
-    margin: "0 auto",
-  } as React.CSSProperties,
-
-  mapCell: {
-    gridColumn: "1",
-    gridRow: "1",
-  } as React.CSSProperties,
-
-  mapCellMobile: {
-    gridColumn: "1",
-    gridRow: "1",
-  } as React.CSSProperties,
-
-  sidebarCard: {
-    gridColumn: "2",
-    gridRow: "1",
-    padding: spacing.md,
-    overflow: "hidden",
-  } as React.CSSProperties,
-
-  sidebarCardMobile: {
-    gridColumn: "1",
-    gridRow: "2",
-    padding: spacing.md,
-    overflow: "hidden",
-  } as React.CSSProperties,
-
-  logsCell: {
-    gridColumn: "1 / -1",
-    gridRow: "2",
-  } as React.CSSProperties,
-
-  logsCellMobile: {
-    gridColumn: "1",
-    gridRow: "3",
   } as React.CSSProperties,
 
   sectionLabel: {
@@ -70,7 +62,24 @@ const styles = {
     marginBottom: spacing.sm,
   } as React.CSSProperties,
 
-  // ── Summary bar — desktop ────────────────────────────────────────────────────
+  // Toggle button for the overlay panel on desktop
+  panelToggle: {
+    position: "absolute" as const,
+    top: spacing.md,
+    right: spacing.md,
+    zIndex: 501,
+    background: `${colors.surface}f0`,
+    backdropFilter: "blur(8px)",
+    border: `1px solid ${colors.surfaceBorder}`,
+    borderRadius: "8px",
+    padding: `6px 12px`,
+    fontSize: typography.sizeXs,
+    color: colors.onSurface,
+    cursor: "pointer",
+    fontWeight: typography.weightMedium,
+  } as React.CSSProperties,
+
+  // ── Summary bar ────────────────────────────────────────────────────────────
   summaryBar: {
     position: "sticky",
     top: 0,
@@ -85,6 +94,19 @@ const styles = {
     flexWrap: "wrap" as const,
   } as React.CSSProperties,
 
+  summaryBarMobile: {
+    position: "sticky",
+    top: 0,
+    zIndex: 50,
+    background: `${colors.backgroundDeep}f0`,
+    backdropFilter: "blur(12px)",
+    borderBottom: `1px solid ${colors.surfaceBorder}`,
+    padding: `${spacing.xs} ${spacing.md}`,
+    display: "flex",
+    alignItems: "center",
+    gap: spacing.sm,
+  } as React.CSSProperties,
+
   summaryStats: {
     display: "flex",
     gap: spacing.xl,
@@ -97,32 +119,6 @@ const styles = {
     alignItems: "center",
     gap: spacing.sm,
     flexShrink: 0,
-  } as React.CSSProperties,
-
-  dividerV: {
-    width: "1px",
-    height: "24px",
-    background: colors.surfaceBorder,
-  } as React.CSSProperties,
-
-  dividerVSm: {
-    width: "1px",
-    height: "16px",
-    background: colors.surfaceBorder,
-  } as React.CSSProperties,
-
-  // ── Summary bar — mobile ─────────────────────────────────────────────────────
-  summaryBarMobile: {
-    position: "sticky",
-    top: 0,
-    zIndex: 50,
-    background: `${colors.backgroundDeep}f0`,
-    backdropFilter: "blur(12px)",
-    borderBottom: `1px solid ${colors.surfaceBorder}`,
-    padding: `${spacing.xs} ${spacing.md}`,
-    display: "flex",
-    alignItems: "center",
-    gap: spacing.sm,
   } as React.CSSProperties,
 
   summaryBarTop: {
@@ -155,7 +151,18 @@ const styles = {
     flexShrink: 0,
   } as React.CSSProperties,
 
-  // ── Shared stat typography ───────────────────────────────────────────────────
+  dividerV: {
+    width: "1px",
+    height: "24px",
+    background: colors.surfaceBorder,
+  } as React.CSSProperties,
+
+  dividerVSm: {
+    width: "1px",
+    height: "16px",
+    background: colors.surfaceBorder,
+  } as React.CSSProperties,
+
   logo: {
     display: "flex",
     alignItems: "center",
@@ -214,17 +221,6 @@ const styles = {
   } as React.CSSProperties,
 } as const;
 
-// ── Responsive selectors ─────────────────────────────────────────────────────
-
-export function getGridStyles(isMobile: boolean) {
-  return {
-    grid: isMobile ? styles.gridMobile : styles.grid,
-    mapCell: isMobile ? styles.mapCellMobile : styles.mapCell,
-    sidebarCard: isMobile ? styles.sidebarCardMobile : styles.sidebarCard,
-    logsCell: isMobile ? styles.logsCellMobile : styles.logsCell,
-  };
-}
-
 export function getSummaryBarStyles(isMobile: boolean) {
   return {
     bar: isMobile ? styles.summaryBarMobile : styles.summaryBar,
@@ -241,6 +237,11 @@ export function getSummaryBarStyles(isMobile: boolean) {
     statValue: isMobile ? styles.statValueMobile : styles.statValue,
     userEmail: styles.userEmail,
   };
+}
+
+// Keep for any remaining imports
+export function getGridStyles(_isMobile: boolean) {
+  return {};
 }
 
 export { styles };

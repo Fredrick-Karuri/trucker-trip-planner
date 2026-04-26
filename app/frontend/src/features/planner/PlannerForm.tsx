@@ -1,23 +1,9 @@
-/**
- * PlannerForm — collects trip inputs and triggers the HOS simulation.
- *
- * Four required fields: current location, pickup, dropoff, and cycle hours used.
- * Renders field-level errors from both client validation and API 400 responses.
- * Transitions to a loading state while the Celery task is processing.
- */
-
 import { useEffect, useRef } from "react";
 import { plannerStyles as s } from "./planner.styles";
-import { type FormValues, type FormErrors } from "./useTripPlanner";
 import { colors, transitions } from "@/tokens";
-import {
-  MapPin,
-  Truck,
-  Clock,
-  Calendar,
-  Loader,
-} from "@/components/icons";
+import { MapPin, Truck, Clock, Calendar, Loader } from "@/components/icons";
 import { Field } from "./PlannerForm.Field";
+import { type FormValues, type FormErrors } from "./useTripPlanner";
 
 interface PlannerFormProps {
   values: FormValues;
@@ -38,7 +24,6 @@ export function PlannerForm({
 }: PlannerFormProps) {
   const firstErrorRef = useRef<HTMLDivElement>(null);
 
-  // Move focus to global error when it appears
   useEffect(() => {
     if (errors.global) firstErrorRef.current?.focus();
   }, [errors.global]);
@@ -58,8 +43,7 @@ export function PlannerForm({
           <p style={s.eyebrow}>FMCSA Compliant</p>
           <h1 style={s.title}>Trucker Trip Planner</h1>
           <p style={s.subtitle}>
-            Enter your trip details to generate a compliant ELD log and route
-            plan.
+            Enter your trip details to generate a compliant ELD log and route plan.
           </p>
         </div>
 
@@ -108,8 +92,8 @@ export function PlannerForm({
 
         <div style={s.divider} />
 
-        {/* HOS + time fields */}
-        <div style={{ ...s.fieldGroup, ...s.inlineRow }}>
+        {/* HOS + time fields — stacked on mobile, side-by-side on sm+ */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
           <Field
             id="cycle_hours_used"
             label="Cycle Hours Used"
@@ -143,21 +127,19 @@ export function PlannerForm({
           onClick={onSubmit}
           style={s.submitButton(isLoading)}
           onMouseEnter={(e) => {
-            if (!isLoading) {
+            if (!isLoading)
               Object.assign(e.currentTarget.style, {
                 background: colors.primaryDark,
                 transform: "translateY(-1px)",
                 transition: `all ${transitions.fast}`,
               });
-            }
           }}
           onMouseLeave={(e) => {
-            if (!isLoading) {
+            if (!isLoading)
               Object.assign(e.currentTarget.style, {
                 background: colors.primary,
                 transform: "translateY(0)",
               });
-            }
           }}
         >
           {isLoading && (
@@ -167,7 +149,6 @@ export function PlannerForm({
               style={{ animation: "spin 0.8s linear infinite" }}
             />
           )}
-
           {buttonLabel}
         </button>
       </div>

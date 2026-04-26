@@ -42,18 +42,18 @@ export const historyStyles = {
     gap: spacing.md,
   } satisfies CSSProperties,
 
-  card: {
-    background: colors.surface,
-    border: `1px solid ${colors.surfaceBorder}`,
-    borderRadius: radius.lg,
-    padding: spacing.lg,
-    cursor: "pointer",
-    transition: `border-color ${transitions.fast}, box-shadow ${transitions.fast}, transform ${transitions.fast}`,
-    display: "grid",
-    gridTemplateColumns: "1fr auto",
-    gap: spacing.md,
-    alignItems: "center",
-  } satisfies CSSProperties,
+card: {
+  background: colors.surface,
+  border: `1px solid ${colors.surfaceBorder}`,
+  borderRadius: radius.lg,
+  padding: spacing.lg,
+  cursor: "pointer",
+  transition: `border-color ${transitions.fast}, box-shadow ${transitions.fast}, transform ${transitions.fast}`,
+  display: "flex",
+  flexDirection: "column" as const,
+  gap: spacing.md,
+} satisfies CSSProperties,
+
 
   cardHover: {
     borderColor: colors.primary,
@@ -61,15 +61,16 @@ export const historyStyles = {
     transform: "translateY(-1px)",
   } satisfies CSSProperties,
 
-  routeLabel: {
-    fontSize: typography.sizeMd,
-    fontWeight: typography.weightSemibold,
-    color: colors.onSurface,
-    marginBottom: "4px",
-    display: "flex",
-    alignItems: "center",
-    gap: spacing.xs,
-  } satisfies CSSProperties,
+routeLabel: {
+  fontSize: typography.sizeMd,
+  fontWeight: typography.weightSemibold,
+  color: colors.onSurface,
+  marginBottom: "4px",
+  display: "flex",
+  alignItems: "center",
+  flexWrap: "wrap" as const,
+  gap: spacing.xs,
+} satisfies CSSProperties,
 
   routeArrow: {
     color: colors.primary,

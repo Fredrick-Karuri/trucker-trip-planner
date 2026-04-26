@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { MapRenderer } from "@/features/map/MapRenderer";
 import { LogTabs } from "@/features/logs/LogTabs";
 import { Card } from "@/components";
@@ -24,6 +25,7 @@ export function ResultsView({
   onReset,
 }: ResultsViewProps) {
   const isMobile = useIsMobile();
+  const [panelOpen, setPanelOpen] = useState(true);
 
   if (status === "submitting" || status === "polling") {
     return (
@@ -42,10 +44,7 @@ export function ResultsView({
     );
   if (!result) return null;
 
-  const grid = isMobile ? styles.gridMobile : styles.grid;
-  const mapCell = isMobile ? styles.mapCellMobile : styles.mapCell;
-  const sidebarCard = isMobile ? styles.sidebarCardMobile : styles.sidebarCard;
-  const logsCell = isMobile ? styles.logsCellMobile : styles.logsCell;
+  const mapSection = isMobile ? styles.mapSectionMobile : styles.mapSection;
 
   return (
     <div style={styles.page}>
@@ -54,18 +53,50 @@ export function ResultsView({
         dayCount={result.daily_logs.length}
         onReset={onReset}
       />
-      <div style={grid}>
-        <div style={mapCell}>
-          <MapRenderer result={result} />
+
+      {/* Map — full width, 75vh desktop / 50vh mobile */}
+      <div style={mapSection}>
+        <MapRenderer result={result} />
+
+        {/* Overlay timeline panel — desktop only */}
+        {!isMobile && panelOpen && (
+          <div style={styles.overlayPanel}>
+            <div style={styles.overlayPanelInner}>
+              <div style={styles.sectionLabel}>Stop Timeline</div>
+              <StopTimeline stops={result.stops} />
+            </div>
+          </div>
+        )}
+
+        {/* Toggle button */}
+        {!isMobile && (
+          <button
+            style={{
+              ...styles.panelToggle,
+              // shift left when panel is open so it doesn't overlap
+              right: panelOpen ? "320px" : undefined,
+            }}
+            onClick={() => setPanelOpen((v) => !v)}
+          >
+            {panelOpen ? "Hide Stops ›" : "‹ Show Stops"}
+          </button>
+        )}
+      </div>
+
+      {/* Mobile: timeline stacks below map */}
+      {isMobile && (
+        <div style={{ padding: `${styles.sectionLabel.marginBottom} 12px` }}>
+          <Card style={{ padding: "12px", marginBottom: "8px" }}>
+            <div style={styles.sectionLabel}>Stop Timeline</div>
+            <StopTimeline stops={result.stops} />
+          </Card>
         </div>
-        <Card style={sidebarCard}>
-          <div style={styles.sectionLabel}>Stop Timeline</div>
-          <StopTimeline stops={result.stops} />
-        </Card>
-        <div style={logsCell}>
-          <div style={styles.sectionLabel}>ELD Daily Log Sheets</div>
-          <LogTabs logs={result.daily_logs} />
-        </div>
+      )}
+
+      {/* ELD Logs — full width below */}
+      <div style={styles.belowMap}>
+        <div style={styles.sectionLabel}>ELD Daily Log Sheets</div>
+        <LogTabs logs={result.daily_logs} />
       </div>
     </div>
   );
