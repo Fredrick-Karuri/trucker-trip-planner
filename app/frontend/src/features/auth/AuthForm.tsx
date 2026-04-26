@@ -9,29 +9,7 @@ import { useState } from "react";
 import { authStyles as s } from "./auth.styles";
 import { useAuthForm, type AuthMode } from "./useAuthForm";
 import { colors } from "@/tokens";
-
-function TruckIcon() {
-  return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
-      stroke={colors.primary} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="1" y="3" width="15" height="13" rx="1"/>
-      <path d="M16 8h4l3 5v3h-7V8z"/>
-      <circle cx="5.5" cy="18.5" r="2.5"/>
-      <circle cx="18.5" cy="18.5" r="2.5"/>
-    </svg>
-  );
-}
-
-function Spinner() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-      stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"
-      style={{ animation: "spin 0.8s linear infinite", transformOrigin: "center" }}>
-      <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
-      <path d="M12 2a10 10 0 1010 10"/>
-    </svg>
-  );
-}
+import { Truck, Loader } from "@/components/icons";
 
 interface FieldProps {
   id: string;
@@ -109,7 +87,11 @@ function ModeForm({ mode }: ModeFormProps) {
         onClick={submit}
         style={s.submitButton(loading)}
       >
-        {loading && <Spinner />}
+        {loading && 
+
+        <Loader size={16} strokeWidth={2.5} style={{ animation: "spin 0.8s linear infinite" }} />
+
+        }
         {loading
           ? mode === "login" ? "Signing in…" : "Creating account…"
           : mode === "login" ? "Sign In" : "Create Account"}
@@ -125,7 +107,8 @@ export function AuthForm() {
     <div style={s.page}>
       <div style={s.card}>
         <div style={s.logo}>
-          <TruckIcon />
+          <Truck size={22} color={colors.primary} strokeWidth={2} />
+
           <span style={s.logoText}>Trucker Trip Planner</span>
         </div>
 
