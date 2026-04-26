@@ -1,14 +1,3 @@
-/**
- * ResultsView — full results layout after a successful simulation.
- *
- * Layout: sticky auth-aware summary bar → map (top) → stop timeline sidebar → tabbed ELD logs.
- * summary bar shows driver email + logout + history link when authenticated.
- */
-import {
-  colors,
-  spacing,
-  typography,
-} from "@/tokens";
 import { MapRenderer } from "@/features/map/MapRenderer";
 import { LogTabs } from "@/features/logs/LogTabs";
 import { Card } from "@/components";
@@ -18,6 +7,8 @@ import { SummaryBar } from "./ResultsView.SummaryBar";
 import { LoadingPanel } from "./ResultsView.LoadingPanel";
 import { ErrorPanel } from "./ResultsView.ErrorPanel";
 import { StopTimeline } from "./ResultsView.StopTimeline";
+import { styles } from "./ResultsView.styles";
+import { useIsMobile } from "@/hooks/useIsMobile";
 
 interface ResultsViewProps {
   result: TripPlanResponse | null;
@@ -32,6 +23,8 @@ export function ResultsView({
   errorMessage,
   onReset,
 }: ResultsViewProps) {
+  const isMobile = useIsMobile();
+
   if (status === "submitting" || status === "polling") {
     return (
       <LoadingPanel
@@ -49,62 +42,28 @@ export function ResultsView({
     );
   if (!result) return null;
 
+  const grid = isMobile ? styles.gridMobile : styles.grid;
+  const mapCell = isMobile ? styles.mapCellMobile : styles.mapCell;
+  const sidebarCard = isMobile ? styles.sidebarCardMobile : styles.sidebarCard;
+  const logsCell = isMobile ? styles.logsCellMobile : styles.logsCell;
+
   return (
-    <div style={{ minHeight: "100vh", background: colors.background }}>
+    <div style={styles.page}>
       <SummaryBar
         summary={result.summary}
         dayCount={result.daily_logs.length}
         onReset={onReset}
       />
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 280px",
-          gridTemplateRows: "480px auto",
-          gap: spacing.md,
-          padding: spacing.md,
-          maxWidth: "1400px",
-          margin: "0 auto",
-        }}
-      >
-        <div style={{ gridColumn: "1", gridRow: "1" }}>
+      <div style={grid}>
+        <div style={mapCell}>
           <MapRenderer result={result} />
         </div>
-        <Card
-          style={{
-            gridColumn: "2",
-            gridRow: "1",
-            padding: spacing.md,
-            overflow: "hidden",
-          }}
-        >
-          <div
-            style={{
-              fontSize: typography.sizeXs,
-              fontWeight: typography.weightMedium,
-              color: colors.onSurfaceFaint,
-              textTransform: "uppercase" as const,
-              letterSpacing: "0.07em",
-              marginBottom: spacing.sm,
-            }}
-          >
-            Stop Timeline
-          </div>
+        <Card style={sidebarCard}>
+          <div style={styles.sectionLabel}>Stop Timeline</div>
           <StopTimeline stops={result.stops} />
         </Card>
-        <div style={{ gridColumn: "1 / -1", gridRow: "2" }}>
-          <div
-            style={{
-              fontSize: typography.sizeXs,
-              fontWeight: typography.weightMedium,
-              color: colors.onSurfaceFaint,
-              textTransform: "uppercase" as const,
-              letterSpacing: "0.07em",
-              marginBottom: spacing.sm,
-            }}
-          >
-            ELD Daily Log Sheets
-          </div>
+        <div style={logsCell}>
+          <div style={styles.sectionLabel}>ELD Daily Log Sheets</div>
           <LogTabs logs={result.daily_logs} />
         </div>
       </div>

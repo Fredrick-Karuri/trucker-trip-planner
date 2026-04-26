@@ -1,16 +1,11 @@
-import {
-  colors,
-  spacing,
-  typography,
-} from "@/tokens";
+import { colors } from "@/tokens";
 import type { TripPlanResponse } from "@/types";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/useAuth";
 import { Truck } from "@/components/icons";
 import { NavBtn } from "./ResultsView.NavBtn";
-
-
-// ─── Summary bar ──────────────────────────────────────────────────────────────
+import { getSummaryBarStyles } from "./ResultsView.styles";
+import { useIsMobile } from "@/hooks/useIsMobile";
 
 interface SummaryBarProps {
   summary: TripPlanResponse["summary"];
@@ -21,6 +16,8 @@ interface SummaryBarProps {
 export function SummaryBar({ summary, dayCount, onReset }: SummaryBarProps) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
+  const s = getSummaryBarStyles(isMobile);
 
   const eta = new Date(summary.eta).toLocaleString(undefined, {
     weekday: "short",
@@ -30,148 +27,73 @@ export function SummaryBar({ summary, dayCount, onReset }: SummaryBarProps) {
     minute: "2-digit",
   });
 
-  const stats = [
-    {
-      label: "Total Miles",
-      value: summary.total_miles.toLocaleString(undefined, {
-        maximumFractionDigits: 0,
-      }),
-    },
-    {
-      label: "Trip Duration",
-      value: `${summary.total_duration_hrs.toFixed(1)} hrs`,
-    },
-    {
-      label: "Drive Time",
-      value: `${summary.total_drive_hrs?.toFixed(1) ?? "—"} hrs`,
-    },
+  const desktopStats = [
+    { label: "Total Miles", value: summary.total_miles.toLocaleString(undefined, { maximumFractionDigits: 0 }) },
+    { label: "Duration", value: `${summary.total_duration_hrs.toFixed(1)} hrs` },
+    { label: "Drive Time", value: `${summary.total_drive_hrs?.toFixed(1) ?? "—"} hrs` },
     { label: "ETA", value: eta },
     { label: "Log Days", value: String(dayCount) },
   ];
 
+  const mobileStats = [
+    { label: "mi", value: summary.total_miles.toLocaleString(undefined, { maximumFractionDigits: 0 }) },
+    { label: "hrs", value: summary.total_duration_hrs.toFixed(1) },
+    { label: "days", value: String(dayCount) },
+  ];
+
+  if (isMobile) {
+    return (
+      <div className="no-print" style={s.bar}>
+        <div style={s.summaryBarTop}>
+          <div style={s.logo}>
+            <Truck size={16} color={colors.primary} strokeWidth={2} />
+            <span style={s.logoText}>TTP</span>
+          </div>
+
+          <div style={s.inlineStats}>
+            {mobileStats.map(({ label, value }) => (
+              <div key={label} style={s.inlineStat}>
+                <span style={s.statValue}>{value}</span>
+                <span style={s.statLabel}>{label}</span>
+              </div>
+            ))}
+          </div>
+
+          <div style={s.actions}>
+            {user && <NavBtn onClick={() => navigate("/history")}>Hist</NavBtn>}
+            <NavBtn onClick={onReset}>← New</NavBtn>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div
-      className="no-print"
-      style={{
-        position: "sticky",
-        top: 0,
-        zIndex: 50,
-        background: `${colors.backgroundDeep}f0`,
-        backdropFilter: "blur(12px)",
-        borderBottom: `1px solid ${colors.surfaceBorder}`,
-        padding: `${spacing.sm} ${spacing.lg}`,
-        display: "flex",
-        alignItems: "center",
-        gap: spacing.xl,
-        flexWrap: "wrap" as const,
-      }}
-    >
-      {/* Logo */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: spacing.sm,
-          flexShrink: 0,
-        }}
-      >
+    <div className="no-print" style={s.bar}>
+      <div style={s.logo}>
         <Truck size={22} color={colors.primary} strokeWidth={2} />
-        <span
-          style={{
-            fontSize: typography.sizeSm,
-            fontWeight: typography.weightSemibold,
-            color: colors.primary,
-          }}
-        >
-          Trucker Trip Planner
-        </span>
+        <span style={s.logoText}>Trucker Trip Planner</span>
       </div>
 
-      <div
-        style={{
-          width: "1px",
-          height: "24px",
-          background: colors.surfaceBorder,
-        }}
-      />
+      <div style={s.divider} />
 
-      {/* Stats */}
-      <div
-        style={{
-          display: "flex",
-          gap: spacing.xl,
-          flexWrap: "wrap" as const,
-          flex: 1,
-        }}
-      >
-        {stats.map(({ label, value }) => (
-          <div
-            key={label}
-            style={{
-              display: "flex",
-              flexDirection: "column" as const,
-              gap: "1px",
-            }}
-          >
-            <span
-              style={{
-                fontSize: "10px",
-                color: colors.onSurfaceFaint,
-                textTransform: "uppercase" as const,
-                letterSpacing: "0.06em",
-              }}
-            >
-              {label}
-            </span>
-            <span
-              style={{
-                fontSize: typography.sizeSm,
-                fontWeight: typography.weightSemibold,
-                color: colors.onSurface,
-                fontFamily: typography.fontMono,
-              }}
-            >
-              {value}
-            </span>
+      <div style={s.stats}>
+        {desktopStats.map(({ label, value }) => (
+          <div key={label} style={s.statItem}>
+            <span style={s.statLabel}>{label}</span>
+            <span style={s.statValue}>{value}</span>
           </div>
         ))}
       </div>
 
-      {/* Right side actions */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: spacing.sm,
-          flexShrink: 0,
-        }}
-      >
+      <div style={s.actions}>
         {user && (
           <>
-            <span
-              style={{
-                fontSize: typography.sizeXs,
-                color: colors.onSurfaceFaint,
-              }}
-            >
-              {user.email}
-            </span>
+            <span style={s.userEmail}>{user.email}</span>
             <NavBtn onClick={() => navigate("/history")}>History</NavBtn>
-            <div
-              style={{
-                width: "1px",
-                height: "16px",
-                background: colors.surfaceBorder,
-              }}
-            />
+            <div style={s.divider} />
             <NavBtn onClick={logout}>Logout</NavBtn>
-            <div
-              style={{
-                width: "1px",
-                height: "16px",
-                background: colors.surfaceBorder,
-              }}
-            />
+            <div style={s.divider} />
           </>
         )}
         <NavBtn onClick={onReset}>← New Trip</NavBtn>
