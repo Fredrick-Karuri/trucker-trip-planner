@@ -1,4 +1,4 @@
-"""WSGI entrypoint for the Trucker Trip Planner API."""
+"""WSGI entrypoint ."""
 
 import os
 from django.core.wsgi import get_wsgi_application

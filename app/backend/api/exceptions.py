@@ -2,20 +2,20 @@
 Custom DRF exception handler.
 
 Maps the connector's typed exceptions to the correct HTTP status codes
-per the system design error handling spec (p.18):
   GeocodingError   → 400 Bad Request
   RoutingError     → 422 Unprocessable Entity
   ORSServiceError  → 503 Service Unavailable
 """
+from typing import Any
 
-from typing import Any, Optional
+from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import exception_handler
 
 from connectors.ors_client import GeocodingError, ORSServiceError, RoutingError
 
 
-def custom_exception_handler(exc: Exception, context: dict[str, Any]) -> Optional[Response]:
+def custom_exception_handler(exc: Exception, context: dict[str, Any]) -> Response | None:
     if isinstance(exc, GeocodingError):
         return Response(
             {"field_errors": [{"field": exc.field, "message": f"Address not found: {exc.address!r}"}]},

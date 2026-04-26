@@ -1,14 +1,16 @@
-"""Root URL configuration for the Trucker Trip Planner."""
+from __future__ import annotations
 
-from django.http import JsonResponse
+from django.http import HttpRequest, HttpResponseRedirect, JsonResponse
 from django.urls import include, path
 
 
-def health(_request):
+def health(_request: HttpRequest) -> JsonResponse:
     return JsonResponse({"status": "ok", "service": "trucker-trip-planner-api"})
 
 
 urlpatterns = [
+    path("", lambda request: HttpResponseRedirect("/api/health/")),
     path("api/health/", health),
+    path("api/auth/", include("users.urls")),
     path("api/", include("api.urls")),
 ]

@@ -9,12 +9,18 @@ redis
 celery
 httpx
 hypothesis
+polyline
 
 pytest
 pytest-django
 pytest-mock
+pytest-timeout
 
 # Stubs
 django-stubs
 djangorestframework-stubs
 mypy
+
+# auth
+argon2-cffi
+djangorestframework-simplejwt

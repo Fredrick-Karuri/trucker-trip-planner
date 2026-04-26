@@ -1,8 +1,8 @@
 """
-OpenRouteService API connector for the Trucker Trip Planner.
+OpenRouteService API connector.
 
 Wraps geocoding and HGV routing. All geocoded addresses are cached in Redis
-using SHA-256(normalized_address) as the key (Architecture Rule #6).
+using SHA-256(normalized_address) as the key.
 
 Raises:
     GeocodingError   → 400 Bad Request  (address not found)
@@ -20,6 +20,7 @@ from typing import Any
 import httpx
 from django.conf import settings
 from django.core.cache import cache
+import polyline
 
 logger = logging.getLogger(__name__)
 
@@ -172,14 +173,26 @@ def _fetch_hgv_route(origin: Coordinate, destination: Coordinate) -> RouteLeg:
     summary = routes[0]["summary"]
     distance_miles = Decimal(str(round(summary["distance"], 2)))
 
-    # Fall back to distance / 55 mph if ORS duration is unavailable (per system design p.18).
+    # Fall back to distance / 55 mph if ORS duration is unavailable.
     if summary.get("duration"):
         duration_hours = Decimal(str(round(summary["duration"] / 3600, 4)))
     else:
         duration_hours = distance_miles / Decimal("55")
 
     geometry = routes[0]["geometry"]
-    coordinates = geometry.get("coordinates", []) if isinstance(geometry, dict) else []
+    if isinstance(geometry, str):
+        coordinates = [[lng, lat] for lat, lng in polyline.decode(geometry)]
+    elif isinstance(geometry, dict):
+        coordinates = geometry.get("coordinates", [])
+    else:
+        coordinates = []
+
+
+    if not coordinates:
+        raise RoutingError(
+            "OpenRouteService returned a route with no geometry coordinates. "
+            "The HGV profile may not cover this road segment."
+        )
 
     return RouteLeg(
         distance_miles=distance_miles,

@@ -48,7 +48,7 @@ export const mapStyles = {
     position: "absolute" as const,
     bottom: spacing.md,
     left: spacing.md,
-    zIndex: 1000,
+    zIndex: 400,
     background: `${colors.surface}ee`,
     backdropFilter: "blur(8px)",
     border: `1px solid ${colors.surfaceBorder}`,

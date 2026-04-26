@@ -1,5 +1,5 @@
 """
-Centralized logging configuration for Trucker Trip Planner.
+Centralized logging configuration .
 All modules obtain their logger from here — never from the stdlib directly.
 """
 

@@ -1,61 +1,24 @@
 """
-Daily Log Generator for the Trucker Trip Planner.
+Daily Log Generator.
 
 Slices a flat TimelineEvent list at UTC midnight boundaries to produce
 one DailyLogSheet per calendar day. Hard-validates that every day's
-totals sum to exactly Decimal('24.00') (Architecture Rule #4 / system design p.9).
+totals sum to exactly Decimal('24.00').
 
 Events that span midnight are split: the tail goes to day N, the head to day N+1.
 """
 
-from dataclasses import dataclass, field
 from datetime import date, datetime, timedelta, timezone
 from decimal import Decimal, ROUND_HALF_UP
-
-from services.types import DutyStatus, EventKind, TimelineEvent
-
-
-# ─── Output types ─────────────────────────────────────────────────────────────
-
-@dataclass
-class LogSegment:
-    """One duty-status band within a single calendar day, ready for SVG rendering."""
-
-    status: DutyStatus
-    start_hhmm: str    # "HH:MM" — local display time
-    end_hhmm: str      # "HH:MM"
-    duration_hrs: Decimal
-    location: str = ""
-
-
-@dataclass
-class LogRemark:
-    time_hhmm: str
-    note: str
-
-
-@dataclass
-class DailyLogTotals:
-    off_duty: Decimal = Decimal("0")
-    sleeper: Decimal = Decimal("0")
-    driving: Decimal = Decimal("0")
-    on_duty: Decimal = Decimal("0")
-
-    @property
-    def total(self) -> Decimal:
-        return self.off_duty + self.sleeper + self.driving + self.on_duty
-
-
-@dataclass
-class DailyLogSheet:
-    """Complete data for one FMCSA 24-hour log sheet."""
-
-    date: date
-    segments: list[LogSegment] = field(default_factory=list)
-    totals: DailyLogTotals = field(default_factory=DailyLogTotals)
-    remarks: list[LogRemark] = field(default_factory=list)
-
-
+from services.types import (
+    DailyLogSheet,
+    DailyLogTotals,
+    DutyStatus,
+    EventKind,
+    LogRemark,
+    LogSegment,
+    TimelineEvent,
+)
 # ─── Helpers ──────────────────────────────────────────────────────────────────
 
 def _utc_midnight(d: date) -> datetime:
@@ -143,32 +106,56 @@ def _slice_event_into_days(
         cursor = next_midnight
 
 
+
 def _fill_day_to_24(sheet: DailyLogSheet) -> None:
     """
-    Pad the final event of a day forward to midnight if rounding leaves a gap.
-    This keeps totals at exactly 24.00 without distorting actual duty times.
+    Pad a day to exactly 24.00 hours after all trip events have been sliced in.
+ 
+    FMCSA rule: post-trip time must be recorded as OFF_DUTY, not ON_DUTY_NOT_DRIVING.
+    Strategy:
+      - If the last segment is already OFF_DUTY or SLEEPER_BERTH, extend it —
+        consolidating consecutive rest is correct and avoids noise.
+      - Otherwise, append a brand-new OFF_DUTY segment for the shortfall.
+      - Empty day (e.g. 34-hr restart spanning the date): fill as 24h OFF_DUTY.
     """
     shortfall = Decimal("24.00") - _round2(sheet.totals.total)
     if shortfall <= Decimal("0"):
         return
-
-    if sheet.segments:
-        last = sheet.segments[-1]
+ 
+    if not sheet.segments:
+        sheet.segments.append(
+            LogSegment(DutyStatus.OFF_DUTY, "00:00", "00:00", Decimal("24.00"))
+        )
+        sheet.totals.off_duty += Decimal("24.00")
+        return
+ 
+    last = sheet.segments[-1]
+    rest_statuses = {DutyStatus.OFF_DUTY, DutyStatus.SLEEPER_BERTH}
+ 
+    if last.status in rest_statuses:
+        # Safe to extend — just more rest time
         padded_hrs = _round2(last.duration_hrs + shortfall)
         sheet.segments[-1] = LogSegment(
             status=last.status,
             start_hhmm=last.start_hhmm,
-            end_hhmm="00:00",   # extends to midnight
+            end_hhmm="00:00",
             duration_hrs=padded_hrs,
             location=last.location,
         )
         _add_to_totals(sheet.totals, last.status, shortfall)
     else:
-        # Empty day (e.g. pure 34-hr restart spanning the date) — fill as OFF_DUTY
+        # Trip ended mid-day (e.g. dropoff at 14:30). Remaining time is OFF_DUTY.
+        trip_end_hhmm = last.end_hhmm
         sheet.segments.append(
-            LogSegment(DutyStatus.OFF_DUTY, "00:00", "00:00", Decimal("24.00"))
+            LogSegment(
+                status=DutyStatus.OFF_DUTY,
+                start_hhmm=trip_end_hhmm,
+                end_hhmm="00:00",
+                duration_hrs=_round2(shortfall),
+                location="",
+            )
         )
-        sheet.totals.off_duty += Decimal("24.00")
+        sheet.totals.off_duty += _round2(shortfall)
 
 
 def _validate_sheet(sheet: DailyLogSheet) -> None:
@@ -186,18 +173,18 @@ def _validate_sheet(sheet: DailyLogSheet) -> None:
 def build_daily_logs(timeline: list[TimelineEvent]) -> list[DailyLogSheet]:
     """
     Convert a flat ordered TimelineEvent list into one DailyLogSheet per calendar day.
-
+ 
     Steps:
         1. Slice every event at UTC midnight, distributing hours to the correct day.
         2. Pad the final segment of each day to reach exactly 24.00 hours.
         3. Hard-validate every sheet totals exactly 24.00 — raises ValueError if not.
-
+ 
     Args:
         timeline: Ordered, gap-free list produced by the HOS rules engine.
-
+ 
     Returns:
         List of DailyLogSheet sorted ascending by date.
-
+ 
     Raises:
         ValueError: If any day's totals do not equal exactly Decimal('24.00').
     """

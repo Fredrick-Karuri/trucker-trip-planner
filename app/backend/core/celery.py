@@ -1,4 +1,4 @@
-"""Celery application for the Trucker Trip Planner worker."""
+"""Celery application."""
 
 import os
 from celery import Celery
