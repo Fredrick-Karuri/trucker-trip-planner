@@ -15,7 +15,7 @@ interface LogSheetProps {
   tripId?: string;
 }
 
-export function LogSheet({ log, tripId }: LogSheetProps) {
+export function LogSheet({ log }: LogSheetProps) {
   const dateObj = new Date(log.date + "T00:00:00Z");
   const dateLabel = dateObj.toLocaleDateString(undefined, {
     weekday: "long",
