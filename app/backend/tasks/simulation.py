@@ -14,6 +14,8 @@ from decimal import Decimal
 from celery import shared_task
 from celery.app.task import Task
 
+from services.types import TripPlanResponse
+
 logger = logging.getLogger(__name__)
 
 
@@ -26,7 +28,7 @@ def simulate_trip(
     dropoff_location: str,
     cycle_hours_used: str,
     start_time: str,
-) -> dict[str, object]:
+) -> TripPlanResponse:
 
     """
     Orchestrates the full trip simulation pipeline.

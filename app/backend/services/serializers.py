@@ -1,5 +1,5 @@
 """
-Result serialiser for the Trucker Trip Planner.
+Result serialiser.
 
 Converts native simulation types (RouteResult, TimelineEvent, DailyLogSheet)
 into the plain dict that the Celery task returns and the API view sends as JSON.
@@ -13,7 +13,7 @@ BoundsFitter on the frontend to zoom the map to the full route correctly.
 from decimal import Decimal
 
 from connectors.ors_client import RouteResult
-from services.types import DailyLogSheet, EventKind, TimelineEvent
+from services.types import DailyLogDict, DailyLogSheet, EventKind, StopDict, TimelineEvent, TripPlanResponse
 
 
 _STOP_KINDS = {
@@ -75,7 +75,7 @@ def serialise_result(
     route: RouteResult,
     timeline: list[TimelineEvent],
     daily_logs: list[DailyLogSheet],
-) -> dict[str, object]:
+) -> TripPlanResponse:
     """
     Produce the full TripPlanResponse-shaped dict from simulation outputs.
 
@@ -95,14 +95,14 @@ def serialise_result(
 
     # Track cumulative miles through the timeline to interpolate stop positions
     cumulative_miles = Decimal("0")
-    stops = []
+    stops:list[StopDict] = []
     for e in timeline:
         cumulative_miles += e.miles_driven
         if e.kind not in _STOP_KINDS:
             continue
 
         coord = _interpolate_coord(all_coords, total_miles_dec, cumulative_miles)
-        stop: dict[str, object] = {
+        stop: StopDict = {
             "type": _STOP_TYPE_LABELS[e.kind],
             "location": e.location,
             "arrival": e.start.strftime("%Y-%m-%dT%H:%M:%SZ"),
@@ -113,7 +113,7 @@ def serialise_result(
             stop["lng"] = round(coord[1], 6)
         stops.append(stop)
 
-    logs = [
+    logs:list[DailyLogDict] = [
         {
             "date": sheet.date.isoformat(),
             "segments": [

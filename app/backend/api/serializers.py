@@ -28,7 +28,7 @@ class TripPlanRequestSerializer(serializers.Serializer[dict[str, object]]):
         return value.strip()
 
 
-class TripSummarySerializer(serializers.ModelSerializer):
+class TripSummarySerializer(serializers.ModelSerializer[Trip]):
     """Compact trip card for the history list page."""
 
     log_days = serializers.SerializerMethodField()

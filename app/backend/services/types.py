@@ -9,6 +9,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, date
 from decimal import Decimal
 from enum import Enum
+from typing import TypedDict
 
 
 class DutyStatus(str, Enum):
@@ -97,3 +98,53 @@ class DailyLogSheet:
     segments: list[LogSegment] = field(default_factory=list)
     totals: DailyLogTotals = field(default_factory=DailyLogTotals)
     remarks: list[LogRemark] = field(default_factory=list)
+
+# Dicts
+
+class TotalsDict(TypedDict):
+    off_duty: float
+    sleeper: float
+    driving: float
+    on_duty: float
+
+class SegmentDict(TypedDict):
+    status: str
+    start: str
+    end: str
+    duration_hrs: float
+    location: str
+
+class RemarkDict(TypedDict):
+    time: str
+    note: str
+
+class DailyLogDict(TypedDict):
+    date: str
+    segments: list[SegmentDict]
+    totals: TotalsDict
+    remarks: list[RemarkDict]
+
+class StopDictBase(TypedDict):
+    type: str
+    location: str
+    arrival: str
+    duration_min: int
+
+class StopDict(StopDictBase, total=False):
+    lat: float
+    lng: float
+
+class SummaryDict(TypedDict):
+    total_miles: float
+    total_duration_hrs: float
+    total_drive_hrs: float
+    eta: str
+
+class RouteDict(TypedDict):
+    geojson: dict[str, object]
+
+class TripPlanResponse(TypedDict):
+    summary: SummaryDict
+    route: RouteDict
+    stops: list[StopDict]
+    daily_logs: list[DailyLogDict]

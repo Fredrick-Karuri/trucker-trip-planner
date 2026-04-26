@@ -2,7 +2,7 @@
 Database models.
 
 All hour/time fields use DecimalField(max_digits=10, decimal_places=2) — never FloatField.
-AUTH-02: Trip.user FK added (nullable for migration safety). result_json added for history replay.
+Trip.user FK added (nullable for migration safety). result_json added for history replay.
 """
 from __future__ import annotations
 
@@ -56,8 +56,8 @@ class Trip(models.Model):
     id: models.UUIDField[uuid.UUID, uuid.UUID] = models.UUIDField(
         primary_key=True, default=uuid.uuid4, editable=False
     )
-    # AUTH-02: owner FK — nullable so existing rows survive the migration
-    user = models.ForeignKey(
+
+    user:models.ForeignKey[Any,Any]  = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name="trips",
@@ -99,7 +99,7 @@ class TripSegment(models.Model):
     The continuous sequence of segments for a trip must have zero gaps.
     """
 
-    trip = models.ForeignKey(Trip, on_delete=models.CASCADE, related_name="segments")
+    trip:models.ForeignKey[Any,Any] = models.ForeignKey(Trip, on_delete=models.CASCADE, related_name="segments")
     status: models.CharField[str, str] = models.CharField(
         max_length=24, choices=DutyStatus.choices
     )
@@ -128,7 +128,7 @@ class DailyLog(models.Model):
     Daily Log Generator service.
     """
 
-    trip = models.ForeignKey(Trip, on_delete=models.CASCADE, related_name="daily_logs")
+    trip:models.ForeignKey[Any,Any] = models.ForeignKey(Trip, on_delete=models.CASCADE, related_name="daily_logs")
     date: models.DateField[str, str] = models.DateField()
     total_off_duty: models.DecimalField[Decimal, Decimal] = models.DecimalField(
         max_digits=10, decimal_places=2, default=Decimal("0")

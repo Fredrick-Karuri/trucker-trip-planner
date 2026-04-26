@@ -31,11 +31,11 @@ class UserManager(BaseUserManager["User"]):
 class User(AbstractBaseUser, PermissionsMixin):
     """Driver account. Email is the unique login identifier."""
 
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    email = models.EmailField(unique=True)
+    id: models.UUIDField[uuid.UUID, uuid.UUID] = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    email: models.EmailField[str, str] = models.EmailField(unique=True)
     is_active = models.BooleanField(default=True)
-    is_staff = models.BooleanField(default=False)
-    created_at = models.DateTimeField(auto_now_add=True)
+    is_staff: bool | models.BooleanField[bool, bool] = models.BooleanField(default=False)
+    created_at: models.DateTimeField[str, str] = models.DateTimeField(auto_now_add=True)
 
     objects: ClassVar[UserManager] = UserManager()
 

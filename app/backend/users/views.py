@@ -16,11 +16,9 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from users.serializers import LoginSerializer, RegisterSerializer, UserSerializer
+from users.models import User
 
-User = get_user_model()
-
-
-def _token_pair(user: object) -> dict:
+def _token_pair(user: User) -> dict[str, str]:
     refresh = RefreshToken.for_user(user)
     return {"access": str(refresh.access_token), "refresh": str(refresh)}
 
