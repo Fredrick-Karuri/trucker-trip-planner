@@ -20,3 +20,6 @@ pytest-timeout
 django-stubs
 djangorestframework-stubs
 mypy
+
+# auth
+argon2-cffi

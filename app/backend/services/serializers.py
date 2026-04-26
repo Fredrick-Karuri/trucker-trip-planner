@@ -5,6 +5,7 @@ Converts native simulation types (RouteResult, TimelineEvent, DailyLogSheet)
 into the plain dict that the Celery task returns and the API view sends as JSON.
 Schema matches the TripPlanResponse TypeScript type exactly .
 
+
 polyline based on cumulative miles at the time of each stop. This enables
 BoundsFitter on the frontend to zoom the map to the full route correctly.
 """
@@ -101,7 +102,7 @@ def serialise_result(
             continue
 
         coord = _interpolate_coord(all_coords, total_miles_dec, cumulative_miles)
-        stop: dict = {
+        stop: dict[str, object] = {
             "type": _STOP_TYPE_LABELS[e.kind],
             "location": e.location,
             "arrival": e.start.strftime("%Y-%m-%dT%H:%M:%SZ"),
