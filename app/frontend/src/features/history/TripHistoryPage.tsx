@@ -50,8 +50,8 @@ function TripCard({ trip, onReplay }: TripCardProps) {
         <div style={s.dateText}>{formatDate(trip.created_at)}</div>
         <div style={s.metaRow}>
           {[
-            { label: "Miles", value: trip.total_miles != null ? `${Math.round(trip.total_miles).toLocaleString()} mi` : "—" },
-            { label: "Duration", value: trip.total_duration_hrs != null ? `${trip.total_duration_hrs.toFixed(1)} hrs` : "—" },
+            { label: "Miles", value: trip.total_miles != null ? `${Math.round(Number(trip.total_miles)).toLocaleString()} mi` : "—" },
+            { label: "Duration", value: trip.total_duration_hrs != null ? `${Number(trip.total_duration_hrs).toFixed(1)} hrs` : "—" },
             { label: "ETA", value: formatEta(trip.eta) },
             { label: "Log Days", value: String(trip.log_days) },
           ].map(({ label, value }) => (
