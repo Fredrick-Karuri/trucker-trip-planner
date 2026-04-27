@@ -12,7 +12,12 @@ from rest_framework.test import APIClient
 
 @pytest.fixture
 def api_client() -> APIClient:
-    return APIClient()
+    from django.contrib.auth import get_user_model
+    User = get_user_model()
+    client = APIClient()
+    user = User.objects.create_user( email="test@example.com", password="testpass")
+    client.force_authenticate(user=user)
+    return client
 
 
 @pytest.mark.django_db
