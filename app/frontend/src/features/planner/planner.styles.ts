@@ -24,6 +24,7 @@ export const plannerStyles = {
     width: "100%",
     maxWidth: "520px",
     boxShadow: shadows.lg,
+    position: "relative" as const,
   } satisfies CSSProperties,
 
   header: {
@@ -154,5 +155,36 @@ export const plannerStyles = {
     color: colors.dangerLight,
     fontSize: typography.sizeSm,
     marginBottom: spacing.lg,
+  } satisfies CSSProperties,
+
+backdrop: {
+    position: "fixed" as const,
+    inset: 0,
+    background: "rgba(0,0,0,0.5)",
+    zIndex: 40,
+  } satisfies CSSProperties,
+
+  modalShell: {
+    position: "fixed" as const,
+    inset: 0,
+    zIndex: 50,
+    overflowY: "auto" as const,
+    display: "flex",
+    alignItems: "flex-start",
+    justifyContent: "center",
+    padding: spacing.xl,
+  } satisfies CSSProperties,
+
+  closeButton: {
+    position: "absolute" as const,
+    top: spacing.md,
+    right: spacing.md,
+    background: "transparent",
+    border: "none",
+    fontSize: "1.25rem",
+    cursor: "pointer",
+    color: colors.onSurfaceMuted,
+    lineHeight: 1,
+    zIndex: 1,
   } satisfies CSSProperties,
 } as const;

@@ -4,6 +4,9 @@
  * Each card shows route label, date, stats. Clicking loads the stored
  * result into ResultsView without re-running the simulation.
  */
+/**
+ * TripHistoryPage — paginated list of the driver's past trips.
+ */
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { historyStyles as s } from "./history.styles";
@@ -13,7 +16,8 @@ import { colors, typography, spacing } from "@/tokens";
 import type { TripHistoryItem, TripHistoryPage } from "@/types";
 import { EmptyState } from "./History.EmptyState";
 import { TripCard } from "./History.TripCard";
-
+import { PlannerForm } from "@/features/planner/PlannerForm";
+import { useTripPlanner } from "@/features/planner/useTripPlanner";
 
 export function TripHistoryPage() {
   const navigate = useNavigate();
@@ -22,6 +26,12 @@ export function TripHistoryPage() {
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [plannerOpen, setPlannerOpen] = useState(false);
+
+  const {
+    values, errors, status, result,
+    updateField, submit, reset, isLoading,
+  } = useTripPlanner();
 
   const load = useCallback(async (pageNum = 1, append = false) => {
     try {
@@ -37,6 +47,19 @@ export function TripHistoryPage() {
   }, []);
 
   useEffect(() => { load(1); }, [load]);
+
+  // On success navigate to the new trip and close
+  useEffect(() => {
+    if (status === "success" && result?.trip_id) {
+      setPlannerOpen(false);
+      navigate(`/trips/${result.trip_id}`);
+    }
+  }, [status, result, navigate]);
+
+  // Reset form each time modal opens
+  useEffect(() => {
+    if (plannerOpen) reset();
+  }, [plannerOpen]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const loadMore = useCallback(() => {
     if (!page || page.page >= page.total_pages) return;
@@ -69,7 +92,7 @@ export function TripHistoryPage() {
         </div>
         <button
           type="button"
-          onClick={() => navigate("/")}
+          onClick={() => setPlannerOpen(true)}
           style={{
             padding: `${spacing.xs} ${spacing.lg}`,
             borderRadius: "8px",
@@ -92,7 +115,7 @@ export function TripHistoryPage() {
       )}
 
       {trips.length === 0 ? (
-        <EmptyState onNew={() => navigate("/")} />
+        <EmptyState onNew={() => setPlannerOpen(true)} />
       ) : (
         <>
           <div style={s.grid}>
@@ -112,6 +135,17 @@ export function TripHistoryPage() {
           )}
         </>
       )}
+
+      <PlannerForm
+        open={plannerOpen}
+        onClose={() => setPlannerOpen(false)}
+        values={values}
+        errors={errors}
+        isLoading={isLoading}
+        pollingStatus={status}
+        onFieldChange={updateField}
+        onSubmit={submit}
+      />
     </div>
   );
 }

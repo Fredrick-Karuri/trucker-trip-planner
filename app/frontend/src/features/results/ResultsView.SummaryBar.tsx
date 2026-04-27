@@ -12,12 +12,9 @@ import { BottomSheet } from "./ResultsView.BottomSheet";
 interface SummaryBarProps {
   summary: TripPlanResponse["summary"];
   dayCount: number;
-  onReset: () => void;
 }
 
-// ─── Main component ───────────────────────────────────────────────────────────
-
-export function SummaryBar({ summary, dayCount, onReset }: SummaryBarProps) {
+export function SummaryBar({ summary, dayCount }: SummaryBarProps) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
@@ -43,20 +40,16 @@ export function SummaryBar({ summary, dayCount, onReset }: SummaryBarProps) {
     { label: "Log Days",    value: String(dayCount) },
   ];
 
-  // ── Mobile ────────────────────────────────────────────────────────────────
-
   if (isMobile) {
     return (
       <>
         <div className="no-print" style={s.bar}>
           <div style={s.summaryBarTop}>
-            {/* Logo */}
             <div style={s.logo}>
               <Truck size={16} color={colors.primary} strokeWidth={2} />
               <span style={s.logoText}>TTP</span>
             </div>
 
-            {/* Inline stats */}
             <div style={s.inlineStats}>
               {mobileStats.map(({ label, value }) => (
                 <div key={label} style={s.inlineStat}>
@@ -66,13 +59,12 @@ export function SummaryBar({ summary, dayCount, onReset }: SummaryBarProps) {
               ))}
             </div>
 
-            {/* Actions */}
             <div className="flex items-center gap-2 ml-auto flex-shrink-0">
               <button
-                onClick={onReset}
+                onClick={() => navigate("/")}
                 className="flex items-center justify-center w-8 h-8 rounded-md border"
                 style={{ borderColor: colors.surfaceBorder, color: colors.onSurfaceMuted }}
-                title="New Trip"
+                title="Trip History"
               >
                 <RotateCcw size={14} />
               </button>
@@ -94,13 +86,10 @@ export function SummaryBar({ summary, dayCount, onReset }: SummaryBarProps) {
           summary={summary}
           dayCount={dayCount}
           eta={eta}
-          onReset={onReset}
         />
       </>
     );
   }
-
-  // ── Desktop ───────────────────────────────────────────────────────────────
 
   return (
     <div className="no-print" style={s.bar}>
@@ -124,13 +113,11 @@ export function SummaryBar({ summary, dayCount, onReset }: SummaryBarProps) {
         {user && (
           <>
             <span style={s.userEmail}>{user.email}</span>
-            <NavBtn onClick={() => navigate("/history")}>History</NavBtn>
-            <div style={s.divider} />
             <NavBtn onClick={logout}>Logout</NavBtn>
             <div style={s.divider} />
           </>
         )}
-        <NavBtn onClick={onReset}>← New Trip</NavBtn>
+        <NavBtn onClick={() => navigate("/")}>← Trip History</NavBtn>
       </div>
     </div>
   );
