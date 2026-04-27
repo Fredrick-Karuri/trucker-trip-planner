@@ -56,6 +56,8 @@ class RouteLeg:
     distance_miles: Decimal
     duration_hours: Decimal
     coordinates: list[list[float]]
+    origin_name: str = ""
+    dest_name: str = ""
 
 
 @dataclass(frozen=True)
@@ -200,24 +202,32 @@ def _fetch_hgv_route(origin: Coordinate, destination: Coordinate) -> RouteLeg:
         coordinates=coordinates,
     )
 
-
 def fetch_route(
     current_location: str,
     pickup_location: str,
     dropoff_location: str,
 ) -> RouteResult:
-    """
-    Geocode all three addresses and fetch two HGV route legs.
-
-    Returns a RouteResult containing per-leg data and a combined GeoJSON
-    LineString covering the full journey for the frontend map renderer.
-    """
     origin = geocode(current_location, "current_location")
     pickup = geocode(pickup_location, "pickup_location")
     dropoff = geocode(dropoff_location, "dropoff_location")
 
-    leg_to_pickup = _fetch_hgv_route(origin, pickup)
-    leg_to_dropoff = _fetch_hgv_route(pickup, dropoff)
+    raw_leg_to_pickup = _fetch_hgv_route(origin, pickup)
+    raw_leg_to_dropoff = _fetch_hgv_route(pickup, dropoff)
+
+    leg_to_pickup = RouteLeg(
+        distance_miles=raw_leg_to_pickup.distance_miles,
+        duration_hours=raw_leg_to_pickup.duration_hours,
+        coordinates=raw_leg_to_pickup.coordinates,
+        origin_name=origin.display_name,
+        dest_name=pickup.display_name,
+    )
+    leg_to_dropoff = RouteLeg(
+        distance_miles=raw_leg_to_dropoff.distance_miles,
+        duration_hours=raw_leg_to_dropoff.duration_hours,
+        coordinates=raw_leg_to_dropoff.coordinates,
+        origin_name=pickup.display_name,
+        dest_name=dropoff.display_name,
+    )
 
     all_coords = leg_to_pickup.coordinates + leg_to_dropoff.coordinates[1:]
 

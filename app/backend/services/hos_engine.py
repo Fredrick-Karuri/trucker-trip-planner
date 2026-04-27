@@ -1,5 +1,5 @@
 """
-HOS Rules Engine.
+Hours Of Service(HOS) Rules Engine.
 
 Pure function: inputs → List[TimelineEvent]. No side effects, no DB calls,
 no network calls.
@@ -16,9 +16,9 @@ from datetime import datetime, timezone, timedelta
 from decimal import Decimal, ROUND_HALF_UP
 from typing import TYPE_CHECKING
 
-from core.hos_config import HOS
+from core.config import HOS
 
-from connectors.ors_client import RouteResult, RouteLeg
+from connectors.open_routes_service import RouteResult, RouteLeg
 from services.types import DutyStatus, EventKind, SimulationState, TimelineEvent
 
 if TYPE_CHECKING:
@@ -268,23 +268,27 @@ def simulate(
     )
     timeline: list[TimelineEvent] = []
 
+    origin_name = route.leg_to_pickup.origin_name
+    pickup_name = route.leg_to_pickup.dest_name
+    dropoff_name = route.leg_to_dropoff.dest_name
+
     # ── Leg 1: Current location → Pickup ──────────────────────────────────────
-    _drive_leg(route.leg_to_pickup, state, timeline, "origin", "pickup")
+    _drive_leg(route.leg_to_pickup, state, timeline, origin_name, pickup_name)
 
     # ── Pickup: 1 hr ON_DUTY_NOT_DRIVING ──────────────────────────────────────
     pickup_duration = HOS.PICKUP_DURATION_HOURS
     timeline.append(
-        _event(EventKind.PICKUP, DutyStatus.ON_DUTY_NOT_DRIVING, state, pickup_duration, "pickup")
+        _event(EventKind.PICKUP, DutyStatus.ON_DUTY_NOT_DRIVING, state, pickup_duration, pickup_name)
     )
     state.cycle_hours_used += pickup_duration
 
     # ── Leg 2: Pickup → Dropoff ────────────────────────────────────────────────
-    _drive_leg(route.leg_to_dropoff, state, timeline, "pickup", "dropoff")
+    _drive_leg(route.leg_to_dropoff, state, timeline, pickup_name, dropoff_name)
 
     # ── Dropoff: 1 hr ON_DUTY_NOT_DRIVING ─────────────────────────────────────
     dropoff_duration = HOS.DROPOFF_DURATION_HOURS
     timeline.append(
-        _event(EventKind.DROPOFF, DutyStatus.ON_DUTY_NOT_DRIVING, state, dropoff_duration, "dropoff")
+        _event(EventKind.DROPOFF, DutyStatus.ON_DUTY_NOT_DRIVING, state, dropoff_duration, dropoff_name)
     )
 
     return timeline

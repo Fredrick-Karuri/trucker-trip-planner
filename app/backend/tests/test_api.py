@@ -12,7 +12,12 @@ from rest_framework.test import APIClient
 
 @pytest.fixture
 def api_client() -> APIClient:
-    return APIClient()
+    from django.contrib.auth import get_user_model
+    User = get_user_model()
+    client = APIClient()
+    user = User.objects.create_user( email="test@example.com", password="testpass")
+    client.force_authenticate(user=user)
+    return client
 
 
 @pytest.mark.django_db
@@ -86,7 +91,7 @@ class TestPlanTripEndpoint:
         assert response.status_code == 400
 
     def test_geocoding_error_returns_400(self, api_client: APIClient) -> None:
-        from connectors.ors_client import GeocodingError
+        from connectors.open_routes_service import GeocodingError
         with patch("api.views.simulate_trip.delay") as mock_delay:
             mock_delay.side_effect = GeocodingError("pickup_location", "Nowhere Land")
             response = api_client.post(
@@ -103,7 +108,7 @@ class TestPlanTripEndpoint:
         assert response.status_code == 400
 
     def test_routing_error_returns_422(self, api_client: APIClient) -> None:
-        from connectors.ors_client import RoutingError
+        from connectors.open_routes_service import RoutingError
         with patch("api.views.simulate_trip.delay") as mock_delay:
             mock_delay.side_effect = RoutingError("No HGV route found")
             response = api_client.post(
@@ -120,7 +125,7 @@ class TestPlanTripEndpoint:
         assert response.status_code == 422
 
     def test_ors_down_returns_503(self, api_client: APIClient) -> None:
-        from connectors.ors_client import ORSServiceError
+        from connectors.open_routes_service import ORSServiceError
         with patch("api.views.simulate_trip.delay") as mock_delay:
             mock_delay.side_effect = ORSServiceError("ORS timeout")
             response = api_client.post(

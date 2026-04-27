@@ -1,9 +1,8 @@
-
 import { colors } from "@/tokens";
 import type { TripPlanResponse } from "@/types";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/useAuth";
-import {  History, LogOut, X, PlusCircle  } from "@/components/icons";
+import { History, LogOut, X } from "@/components/icons";
 
 interface BottomSheetProps {
   open: boolean;
@@ -11,10 +10,9 @@ interface BottomSheetProps {
   summary: TripPlanResponse["summary"];
   dayCount: number;
   eta: string;
-  onReset: () => void;
 }
 
-export function BottomSheet({ open, onClose, summary, dayCount, eta, onReset }: BottomSheetProps) {
+export function BottomSheet({ open, onClose, summary, dayCount, eta }: BottomSheetProps) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
@@ -28,7 +26,6 @@ export function BottomSheet({ open, onClose, summary, dayCount, eta, onReset }: 
 
   return (
     <>
-      {/* Backdrop */}
       {open && (
         <div
           className="fixed inset-0 z-[998] bg-black/50 backdrop-blur-sm"
@@ -36,7 +33,6 @@ export function BottomSheet({ open, onClose, summary, dayCount, eta, onReset }: 
         />
       )}
 
-      {/* Sheet */}
       <div
         className={`
           fixed bottom-0 left-0 right-0 z-[999]
@@ -49,12 +45,10 @@ export function BottomSheet({ open, onClose, summary, dayCount, eta, onReset }: 
           borderColor: colors.surfaceBorder,
         }}
       >
-        {/* Handle */}
         <div className="flex justify-center pt-3 pb-1">
           <div className="w-10 h-1 rounded-full" style={{ background: colors.surfaceBorder }} />
         </div>
 
-        {/* Header */}
         <div className="flex items-center justify-between px-5 py-3">
           <span className="text-sm font-semibold" style={{ color: colors.onSurface }}>
             Trip Details
@@ -64,7 +58,6 @@ export function BottomSheet({ open, onClose, summary, dayCount, eta, onReset }: 
           </button>
         </div>
 
-        {/* Stats grid */}
         <div className="grid grid-cols-3 gap-3 px-5 pb-4">
           {stats.map(({ label, value }) => (
             <div key={label} className="flex flex-col gap-0.5">
@@ -78,10 +71,8 @@ export function BottomSheet({ open, onClose, summary, dayCount, eta, onReset }: 
           ))}
         </div>
 
-        {/* Divider */}
         <div className="mx-5" style={{ height: 1, background: colors.surfaceBorder }} />
 
-        {/* Actions */}
         <div className="flex flex-col gap-1 px-5 py-3">
           {user && (
             <div className="text-xs pb-2" style={{ color: colors.onSurfaceFaint }}>
@@ -90,7 +81,7 @@ export function BottomSheet({ open, onClose, summary, dayCount, eta, onReset }: 
           )}
           {user && (
             <button
-              onClick={() => { navigate("/history"); onClose(); }}
+              onClick={() => { navigate("/"); onClose(); }}
               className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm text-left transition-colors"
               style={{ color: colors.onSurface }}
             >
@@ -98,15 +89,6 @@ export function BottomSheet({ open, onClose, summary, dayCount, eta, onReset }: 
               Trip History
             </button>
           )}
-          <button
-            onClick={() => { onReset(); onClose(); }}
-            className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm text-left"
-            style={{ color: colors.onSurface }}
-          >
-
-            <PlusCircle size={16} />
-            New Trip
-          </button>
           {user && (
             <button
               onClick={() => { logout(); onClose(); }}
@@ -119,7 +101,6 @@ export function BottomSheet({ open, onClose, summary, dayCount, eta, onReset }: 
           )}
         </div>
 
-        {/* Safe area spacer */}
         <div className="pb-safe h-6" />
       </div>
     </>

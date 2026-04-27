@@ -8,9 +8,7 @@ from datetime import timedelta
 import os
 from pathlib import Path
 import dj_database_url
-from core.logging import configure_logging
 
-configure_logging(level=os.environ.get("LOG_LEVEL", "INFO"))
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 

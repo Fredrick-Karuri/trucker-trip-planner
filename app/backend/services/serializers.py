@@ -12,7 +12,7 @@ BoundsFitter on the frontend to zoom the map to the full route correctly.
 
 from decimal import Decimal
 
-from connectors.ors_client import RouteResult
+from connectors.open_routes_service import RouteResult
 from services.types import DailyLogDict, DailyLogSheet, EventKind, StopDict, TimelineEvent, TripPlanResponse
 
 

@@ -14,7 +14,7 @@ import pytest
 
 from services.daily_log_generator import build_daily_logs
 from tests.conftest import make_route, START_TIME
-from services.hos_rules_engine import simulate
+from services.hos_engine import simulate
 from services.types import DailyLogSheet, DutyStatus, EventKind, TimelineEvent
 
 

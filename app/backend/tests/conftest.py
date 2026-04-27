@@ -16,7 +16,7 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "core.settings")
 os.environ.setdefault("DATABASE_URL", "sqlite:///test.db")
 django.setup()
 
-from connectors.ors_client import RouteResult, RouteLeg
+from connectors.open_routes_service import RouteResult, RouteLeg
 
 
 def make_route(

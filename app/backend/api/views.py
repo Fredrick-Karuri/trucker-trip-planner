@@ -80,7 +80,7 @@ def trip_status(request: Request, task_id: str) -> Response:
 
     if result.state == "FAILURE":
         exc = result.result
-        from connectors.ors_client import GeocodingError, ORSServiceError, RoutingError
+        from connectors.open_routes_service import GeocodingError, ORSServiceError, RoutingError
         error_message = str(exc) if exc else "Simulation failed."
         if isinstance(exc, GeocodingError):
             return Response({"task_id": task_id, "status": "FAILURE", "error": error_message}, status=400)

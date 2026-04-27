@@ -39,9 +39,7 @@ export function ResultsView({
     );
   }
   if (status === "error")
-    return (
-      <ErrorPanel message={errorMessage ?? "Unknown error"} onReset={onReset} />
-    );
+    return <ErrorPanel message={errorMessage ?? "Unknown error"} onReset={onReset} />;
   if (!result) return null;
 
   const mapSection = isMobile ? styles.mapSectionMobile : styles.mapSection;
@@ -51,14 +49,11 @@ export function ResultsView({
       <SummaryBar
         summary={result.summary}
         dayCount={result.daily_logs.length}
-        onReset={onReset}
       />
 
-      {/* Map — full width, 75vh desktop / 50vh mobile */}
       <div style={mapSection}>
         <MapRenderer result={result} />
 
-        {/* Overlay timeline panel — desktop only */}
         {!isMobile && panelOpen && (
           <div style={styles.overlayPanel}>
             <div style={styles.overlayPanelInner}>
@@ -68,12 +63,10 @@ export function ResultsView({
           </div>
         )}
 
-        {/* Toggle button */}
         {!isMobile && (
           <button
             style={{
               ...styles.panelToggle,
-              // shift left when panel is open so it doesn't overlap
               right: panelOpen ? "320px" : undefined,
             }}
             onClick={() => setPanelOpen((v) => !v)}
@@ -83,7 +76,6 @@ export function ResultsView({
         )}
       </div>
 
-      {/* Mobile: timeline stacks below map */}
       {isMobile && (
         <div style={{ padding: `${styles.sectionLabel.marginBottom} 12px` }}>
           <Card style={{ padding: "12px", marginBottom: "8px" }}>
@@ -93,7 +85,6 @@ export function ResultsView({
         </div>
       )}
 
-      {/* ELD Logs — full width below */}
       <div style={styles.belowMap}>
         <div style={styles.sectionLabel}>ELD Daily Log Sheets</div>
         <LogTabs logs={result.daily_logs} />

@@ -1,4 +1,4 @@
-# core/hos_config.py
+# core/config.py
 from decimal import Decimal
 from dataclasses import dataclass
 

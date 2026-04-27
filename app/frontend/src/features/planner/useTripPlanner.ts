@@ -108,7 +108,7 @@ export function useTripPlanner() {
   }, []);
 
   const poll = useCallback(
-    async (taskId: string) => {
+    async (taskId: string,tripId: string) => {
       if (pollCount.current >= MAX_POLL_ATTEMPTS) {
         stopPolling();
         setStatus("error");
@@ -123,7 +123,7 @@ export function useTripPlanner() {
 
         if (taskStatus.status === "SUCCESS" && taskStatus.result) {
           stopPolling();
-          setResult(taskStatus.result);
+          setResult({ ...taskStatus.result, trip_id: tripId });
           setStatus("success");
           return;
         }
@@ -136,7 +136,7 @@ export function useTripPlanner() {
         }
 
         // Still PENDING or STARTED — schedule next poll
-        pollTimer.current = setTimeout(() => poll(taskId), POLL_INTERVAL_MS);
+        pollTimer.current = setTimeout(() => poll(taskId,tripId), POLL_INTERVAL_MS);
       } catch (err) {
         stopPolling();
         const apiError = extractApiError(err);
@@ -167,9 +167,9 @@ export function useTripPlanner() {
     };
 
     try {
-      const { task_id } = await submitTripPlan(payload);
+      const { task_id,trip_id } = await submitTripPlan(payload);
       setStatus("polling");
-      poll(task_id);
+      poll(task_id,trip_id);
     } catch (err) {
       const apiError = extractApiError(err);
       setStatus("error");
