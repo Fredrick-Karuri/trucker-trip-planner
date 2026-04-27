@@ -268,23 +268,27 @@ def simulate(
     )
     timeline: list[TimelineEvent] = []
 
+    origin_name = route.leg_to_pickup.origin_name
+    pickup_name = route.leg_to_pickup.dest_name
+    dropoff_name = route.leg_to_dropoff.dest_name
+
     # ── Leg 1: Current location → Pickup ──────────────────────────────────────
-    _drive_leg(route.leg_to_pickup, state, timeline, "origin", "pickup")
+    _drive_leg(route.leg_to_pickup, state, timeline, origin_name, pickup_name)
 
     # ── Pickup: 1 hr ON_DUTY_NOT_DRIVING ──────────────────────────────────────
     pickup_duration = HOS.PICKUP_DURATION_HOURS
     timeline.append(
-        _event(EventKind.PICKUP, DutyStatus.ON_DUTY_NOT_DRIVING, state, pickup_duration, "pickup")
+        _event(EventKind.PICKUP, DutyStatus.ON_DUTY_NOT_DRIVING, state, pickup_duration, pickup_name)
     )
     state.cycle_hours_used += pickup_duration
 
     # ── Leg 2: Pickup → Dropoff ────────────────────────────────────────────────
-    _drive_leg(route.leg_to_dropoff, state, timeline, "pickup", "dropoff")
+    _drive_leg(route.leg_to_dropoff, state, timeline, pickup_name, dropoff_name)
 
     # ── Dropoff: 1 hr ON_DUTY_NOT_DRIVING ─────────────────────────────────────
     dropoff_duration = HOS.DROPOFF_DURATION_HOURS
     timeline.append(
-        _event(EventKind.DROPOFF, DutyStatus.ON_DUTY_NOT_DRIVING, state, dropoff_duration, "dropoff")
+        _event(EventKind.DROPOFF, DutyStatus.ON_DUTY_NOT_DRIVING, state, dropoff_duration, dropoff_name)
     )
 
     return timeline

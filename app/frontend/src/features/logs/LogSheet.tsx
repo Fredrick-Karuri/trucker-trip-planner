@@ -5,7 +5,7 @@
  * Print styles hide everything except this component (see global.css .no-print).
  */
 
-import { TotalsBar } from "./LodSheet.TotalsBar";
+import { TotalsBar } from "./LogSheet.TotalsBar";
 import { logStyles as s } from "./logs.styles";
 import { LogSheetGrid } from "./LogSheetGrid";
 import type { DailyLogEntry } from "@/types";

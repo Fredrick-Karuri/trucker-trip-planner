@@ -51,7 +51,7 @@ def simulate_trip(
     """
     from api.models import Trip
     from connectors.open_routes_service import fetch_route
-    from services.hos_rules_engine import simulate
+    from services.hos_engine import simulate
     from services.daily_log_generator import build_daily_logs
     from services.serializers import serialise_result
 
