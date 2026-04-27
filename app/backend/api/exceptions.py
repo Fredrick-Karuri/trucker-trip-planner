@@ -12,7 +12,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import exception_handler
 
-from connectors.ors_client import GeocodingError, ORSServiceError, RoutingError
+from connectors.open_routes_service import GeocodingError, ORSServiceError, RoutingError
 
 
 def custom_exception_handler(exc: Exception, context: dict[str, Any]) -> Response | None:

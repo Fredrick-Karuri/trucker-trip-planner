@@ -50,7 +50,7 @@ def simulate_trip(
         start_time:       ISO 8601 UTC departure timestamp.
     """
     from api.models import Trip
-    from connectors.ors_client import fetch_route
+    from connectors.open_routes_service import fetch_route
     from services.hos_rules_engine import simulate
     from services.daily_log_generator import build_daily_logs
     from services.serializers import serialise_result

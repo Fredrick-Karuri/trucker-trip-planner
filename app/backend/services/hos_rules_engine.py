@@ -1,5 +1,5 @@
 """
-HOS Rules Engine.
+Hours Of Service(HOS) Rules Engine.
 
 Pure function: inputs → List[TimelineEvent]. No side effects, no DB calls,
 no network calls.
@@ -16,9 +16,9 @@ from datetime import datetime, timezone, timedelta
 from decimal import Decimal, ROUND_HALF_UP
 from typing import TYPE_CHECKING
 
-from core.hos_config import HOS
+from core.config import HOS
 
-from connectors.ors_client import RouteResult, RouteLeg
+from connectors.open_routes_service import RouteResult, RouteLeg
 from services.types import DutyStatus, EventKind, SimulationState, TimelineEvent
 
 if TYPE_CHECKING:
