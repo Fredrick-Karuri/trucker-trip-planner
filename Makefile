@@ -55,8 +55,8 @@ drop-testdb:
 	docker compose exec db psql -U postgres -c \
 		"DROP DATABASE IF EXISTS test_trucker_trip_planner;" 2>/dev/null || true
 
-seed:
-	docker compose exec api python scripts/seed.py
+flush-cache:
+	docker compose exec redis redis-cli FLUSHDB
 
 help:
 	@echo ""
@@ -74,7 +74,7 @@ help:
 	@echo "  make shell            Django shell"
 	@echo "  make makemigrations   Create new migrations"
 	@echo "  make migrate          Apply migrations"
-	@echo "  make seed             Seed the database"
 	@echo "  make test             Run pytest"
 	@echo "  make test-property    Run property-based (Hypothesis) tests only"
+	@echo "  make flush-cache      Flush Redis cache"
 	@echo ""
