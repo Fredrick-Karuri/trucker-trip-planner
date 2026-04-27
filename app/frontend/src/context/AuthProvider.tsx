@@ -1,4 +1,3 @@
-
 import {
   useCallback,
   useEffect,
@@ -12,20 +11,19 @@ import client from "@/services/api";
 import type { AuthTokens, User } from "@/types";
 import { AuthContext } from "./AuthContext";
 
-// ─── Storage keys ─────────────────────────────────────────────────────────────
-
 const ACCESS_KEY = "ttp_access";
 const REFRESH_KEY = "ttp_refresh";
 const USER_KEY = "ttp_user";
-
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(() => {
     const stored = localStorage.getItem(USER_KEY);
     return stored ? (JSON.parse(stored) as User) : null;
   });
+  const [authReady, setAuthReady] = useState(false);
 
   const isRefreshing = useRef(false);
+  const interceptorsAttached = useRef(false);
   const failedQueue = useRef<Array<(token: string) => void>>([]);
 
   const logout = useCallback(() => {
@@ -42,8 +40,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(tokens.user);
   }, []);
 
-  // ── Axios interceptors ──────────────────────────────────────────────────────
   useEffect(() => {
+    if (interceptorsAttached.current) return;
+    interceptorsAttached.current = true;
+
     const reqId = client.interceptors.request.use((config) => {
       const token = localStorage.getItem(ACCESS_KEY);
       if (token) config.headers.Authorization = `Bearer ${token}`;
@@ -91,15 +91,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     );
 
+    setAuthReady(true);
+
     return () => {
       client.interceptors.request.eject(reqId);
       client.interceptors.response.eject(resId);
+      interceptorsAttached.current = false;
     };
   }, [logout]);
 
   const value = useMemo(
-    () => ({ user, isAuthenticated: !!user, login, logout }),
-    [user, login, logout]
+    () => ({ user, isAuthenticated: !!user, login, logout, authReady }),
+    [user, login, logout, authReady]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

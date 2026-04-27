@@ -18,6 +18,7 @@ import { EmptyState } from "./History.EmptyState";
 import { TripCard } from "./History.TripCard";
 import { PlannerForm } from "@/features/planner/PlannerForm";
 import { useTripPlanner } from "@/features/planner/useTripPlanner";
+import { useAuth } from "@/context/useAuth";
 
 export function TripHistoryPage() {
   const navigate = useNavigate();
@@ -27,17 +28,24 @@ export function TripHistoryPage() {
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [plannerOpen, setPlannerOpen] = useState(false);
+  const { authReady } = useAuth();
 
   const {
-    values, errors, status, result,
-    updateField, submit, reset, isLoading,
+    values,
+    errors,
+    status,
+    result,
+    updateField,
+    submit,
+    reset,
+    isLoading,
   } = useTripPlanner();
 
   const load = useCallback(async (pageNum = 1, append = false) => {
     try {
       const data = await fetchTripHistory(pageNum);
       setPage(data);
-      setTrips((prev) => append ? [...prev, ...data.results] : data.results);
+      setTrips((prev) => (append ? [...prev, ...data.results] : data.results));
     } catch {
       setError("Failed to load trip history.");
     } finally {
@@ -46,7 +54,10 @@ export function TripHistoryPage() {
     }
   }, []);
 
-  useEffect(() => { load(1); }, [load]);
+  useEffect(() => {
+    if (!authReady) return;
+    load(1);
+  }, [load, authReady]);
 
   // On success navigate to the new trip and close
   useEffect(() => {
@@ -67,13 +78,23 @@ export function TripHistoryPage() {
     load(page.page + 1, true);
   }, [page, load]);
 
-  const onReplay = useCallback((id: string) => {
-    navigate(`/trips/${id}`);
-  }, [navigate]);
+  const onReplay = useCallback(
+    (id: string) => {
+      navigate(`/trips/${id}`);
+    },
+    [navigate],
+  );
 
   if (loading) {
     return (
-      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <div
+        style={{
+          minHeight: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
         <Spinner size={32} />
       </div>
     );
@@ -109,7 +130,13 @@ export function TripHistoryPage() {
       </div>
 
       {error && (
-        <div style={{ color: colors.dangerLight, marginBottom: spacing.lg, fontSize: typography.sizeSm }}>
+        <div
+          style={{
+            color: colors.dangerLight,
+            marginBottom: spacing.lg,
+            fontSize: typography.sizeSm,
+          }}
+        >
           {error}
         </div>
       )}
@@ -130,7 +157,9 @@ export function TripHistoryPage() {
               disabled={loadingMore}
               style={s.loadMoreBtn}
             >
-              {loadingMore ? "Loading…" : `Load more (${page.count - trips.length} remaining)`}
+              {loadingMore
+                ? "Loading…"
+                : `Load more (${page.count - trips.length} remaining)`}
             </button>
           )}
         </>
